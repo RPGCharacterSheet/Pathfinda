@@ -8,8 +8,10 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <StackPanel Orientation="Vertical" >
-            <Button Content="Generate C# from spells DB" Click="Button_Click"/>
-            <TextBox x:Name="result" Text="Results will be displayed here" TextWrapping="Wrap" />
+            <Button Content="Generate Spells.cs" Click="Button_Click" Margin="4"/>
+            <Button Content="Generate Feats.cs" Click="Button_Click_2" Margin="4" />
+            <Button Content="Generate All" Click="Button_Click_3" Margin="4" Width="200" Height="50" />
+            <TextBox x:Name="result" Text="Results will be displayed here" TextWrapping="Wrap" Margin="4" />
         </StackPanel>
     </Grid>
 </Window>

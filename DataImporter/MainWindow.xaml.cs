@@ -24,8 +24,11 @@ namespace DataImporter
         public MainWindow()
         {
             InitializeComponent();
+            // sources: 
+            // http://www.pathfindercommunity.net/home/databases
         }
 
+        // spells
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             // column headers:
@@ -59,11 +62,11 @@ namespace Pathfinda
                     {";
             foreach (var row in data.Rows)
             {
-                if (row.Value[data.Columns["source"]].ToLower() == "pfrpg core")
+                //if (row.Value[data.Columns["source"]].ToLower() == "pfrpg core")
                     code += Environment.NewLine + "new Spell(){ Name = \"" + row.Value[data.Columns["name"]] + "\", Description = @\"" + row.Value[data.Columns["full_text"]].Replace("\"", "\"\"") + "\"},";
             }
-            code += Environment.NewLine + "};";
             code += @"
+                    };
                 }
                 return _spells;
             }
@@ -72,6 +75,67 @@ namespace Pathfinda
 }";
             System.IO.File.WriteAllText("Spells.cs", code);
             result.Text = "Spells.cs written to disk. Copy it into your project folder.";
+        }
+
+        // feats
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            // columns:
+            // id, name, type, description, prerequisites, prerequisite_feats, benefit, normal, special, source, fulltext, teamwork, critical, grit, style, performance, racial, companion_familiar ,race_name, note, goal, completion_benefit, multiples, suggested_traits, prerequisite_skills, panache, betrayal, targeting, esoteric, stare, weapon_mastery, item_mastery, armor_mastery, shield_mastery, blood_hex
+            string csv = "";
+            using (WebClient wc = new WebClient())
+            {
+                csv = wc.DownloadString("https://docs.google.com/spreadsheet/pub?key=0AhwDI9kFz9SddEJPRDVsYVczNVc2TlF6VDNBYTZqbkE&output=csv");
+            }
+            var data = CSVParser.Parse(csv);
+            string code = "";
+            code = @"using System.Collections.Generic;
+
+namespace Pathfinda
+{
+    public static partial class ImportedData
+    {
+        public class Feat
+        {
+            public string Name { get; set; }
+            public string Description { get; set; }
+        }
+
+        private static List<Feat> _feats = null;
+        public static List<Feat> Feats
+        {
+            get
+            {
+                if (_feats == null)
+                {
+                    _feats = new List<Feat>()
+                    {";
+            foreach (var row in data.Rows)
+            {
+                //if (row.Value[data.Columns["source"]].ToLower() == "pfrpg core")
+                    code += Environment.NewLine + "new Feat(){ Name = \"" + row.Value[data.Columns["name"]] + "\", Description = @\"" + row.Value[data.Columns["fulltext"]].Replace("\"", "\"\"") + "\"},";
+            }
+            code += @"
+                    };
+                }
+                return _feats;
+            }
+        }
+    }
+}";
+            System.IO.File.WriteAllText("Feats.cs", code);
+            result.Text = "Feats.cs written to disk. Copy it into your project folder.";
+        }
+
+        private async void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            result.Text = "Processing Spells.";
+            await Task.Delay(500);
+            Button_Click(null, null);
+            result.Text = "Spells done. Next is Feats.";
+            await Task.Delay(500);
+            Button_Click_2(null, null);
+            result.Text = "All done!";
         }
     }
 }
