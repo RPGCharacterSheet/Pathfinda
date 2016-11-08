@@ -52,48 +52,56 @@ namespace Pathfinda.SaveData
             }
         }
 
+
+        public int getDexModifier()
+        {
+            return Math.Min(AbilityScores[Abilities.Dexterity].Modifier, Encumbrance.MaxDexBonus());
+        }
+
+        private int tryKey (Gear item, ItemProperties key,  int def = 0)
+        {
+            return item.Properties.ContainsKey(key) ? item.Properties[key] : def;
+        }
+
+        // Aggregate all item additions in inventory. Should we be filtering by equipped or not?
+        private int getItemsModifier(List<ItemProperties> items)
+        {
+            return Inventory.Sum(item => items.Sum(x => tryKey(item, x)));
+        }
+
+        private List<MiscEffect> filterMiscEffects(List<ItemProperties> matches)
+        {
+            return MiscEffects.Where(misc => matches.Contains(misc.Property)) as List<MiscEffect>;
+        }
+
+        private int ArmorCalculator(List<ItemProperties> modifiers)
+        {
+            // misc effects
+            var miscArmorEffects = filterMiscEffects(modifiers);
+
+            return new int[]
+            {
+                10,                                 //always get natural 10
+                getDexModifier(),                   //addDex
+                Size.ACAndAttackBonus(),            //Add ac from Size
+                miscArmorEffects.Sum(x => x.Value), //Add misc armor effects
+                getItemsModifier(modifiers)             //Add Modifiers from Items
+            }.Sum();
+        }
+
+        delegate int del(Gear item,  ItemProperties key);
         public string ArmorClassDescription { get; private set; }
         public int ArmorClass
         {
             get
             {
-                int AC = 10; // always get natural 10
-                ArmorClassDescription = "10";
-                // inventory
-                foreach (var item in Inventory)
+                return ArmorCalculator(new List<ItemProperties>
                 {
-                    int totalBonus = 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.ArmorBonus) ? item.Properties[ItemProperties.ArmorBonus] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.NaturalArmor) ? item.Properties[ItemProperties.NaturalArmor] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.Dodge) ? item.Properties[ItemProperties.Dodge] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.Deflection) ? item.Properties[ItemProperties.Deflection] : 0;
-                    if (totalBonus != 0)
-                    {
-                        AC += totalBonus;
-                        ArmorClassDescription += " + " + totalBonus + " from " + item.Name;
-                    }
-                }
-                // dex
-                if (AbilityScores[Abilities.Dexterity].Modifier != 0)
-                {
-                    int amountFromDex = Math.Min(AbilityScores[Abilities.Dexterity].Modifier, Encumbrance.MaxDexBonus());
-                    AC += amountFromDex;
-                    ArmorClassDescription += " + " + amountFromDex + " from Dex";
-                }
-                // size
-                if (Size.ACAndAttackBonus() != 0)
-                {
-                    AC += Size.ACAndAttackBonus();
-                    ArmorClassDescription += " + " + Size.ACAndAttackBonus() + " from " + Size.ToString() + " Size";
-                }
-                // misc effects
-                var miscArmorEffects = MiscEffects.Where(x => x.Property == ItemProperties.ArmorBonus || x.Property == ItemProperties.Deflection || x.Property == ItemProperties.NaturalArmor || x.Property == ItemProperties.Dodge);
-                if (miscArmorEffects.Count() > 0)
-                {
-                    AC += miscArmorEffects.Sum(x => x.Value); // add armor bonuses from random character-based effects
-                    ArmorClassDescription += " + " + String.Join(" + ", miscArmorEffects.Select(x => x.Value + " from " + x.Source));
-                }
-                return AC;
+                    ItemProperties.ArmorBonus,
+                    ItemProperties.NaturalArmor,
+                    ItemProperties.Dodge,
+                    ItemProperties.Deflection
+                });
             }
         }
 
@@ -102,42 +110,12 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                // same as regular AC but armor and natural armor don't count
-                int AC = 10; // always get natural 10
-                TouchACDescription = "10";
-                // inventory
-                foreach (var item in Inventory)
+                return ArmorCalculator(new List<ItemProperties> 
                 {
-                    int totalBonus = 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.Dodge) ? item.Properties[ItemProperties.Dodge] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.Deflection) ? item.Properties[ItemProperties.Deflection] : 0;
-                    if (totalBonus != 0)
-                    {
-                        AC += totalBonus;
-                        TouchACDescription += " + " + totalBonus + " from " + item.Name;
-                    }
-                }
-                // dex
-                if (AbilityScores[Abilities.Dexterity].Modifier != 0)
-                {
-                    int amountFromDex = Math.Min(AbilityScores[Abilities.Dexterity].Modifier, Encumbrance.MaxDexBonus());
-                    AC += amountFromDex;
-                    TouchACDescription += " + " + amountFromDex + " from Dex";
-                }
-                // size
-                if (Size.ACAndAttackBonus() != 0)
-                {
-                    AC += Size.ACAndAttackBonus();
-                    TouchACDescription += " + " + Size.ACAndAttackBonus() + " from " + Size.ToString() + " Size";
-                }
-                // misc effects
-                var miscArmorEffects = MiscEffects.Where(x => x.Property == ItemProperties.Deflection || x.Property == ItemProperties.Dodge);
-                if (miscArmorEffects.Count() > 0)
-                {
-                    AC += miscArmorEffects.Sum(x => x.Value); // add armor bonuses from random character-based effects
-                    TouchACDescription += " + " + String.Join(" + ", miscArmorEffects.Select(x => x.Value + " from " + x.Source));
-                }
-                return AC;
+                    ItemProperties.Dodge,
+                    ItemProperties.Deflection
+                });
+                
             }
         }
 
@@ -146,36 +124,13 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                // same as regular AC but dex and dodge don't count
-                int AC = 10; // always get natural 10
-                FlatFootedACDescription = "10";
-                // items in inventory
-                foreach (var item in Inventory)
+
+                return ArmorCalculator(new List<ItemProperties> 
                 {
-                    int totalBonus = 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.ArmorBonus) ? item.Properties[ItemProperties.ArmorBonus] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.NaturalArmor) ? item.Properties[ItemProperties.NaturalArmor] : 0;
-                    totalBonus += item.Properties.ContainsKey(ItemProperties.Deflection) ? item.Properties[ItemProperties.Deflection] : 0;
-                    if (totalBonus != 0)
-                    {
-                        AC += totalBonus;
-                        FlatFootedACDescription += " + " + totalBonus + " from " + item.Name;
-                    }
-                }
-                // size
-                if (Size.ACAndAttackBonus() != 0)
-                {
-                    AC += Size.ACAndAttackBonus();
-                    FlatFootedACDescription += " + " + Size.ACAndAttackBonus() + " from " + Size.ToString() + " Size";
-                }
-                // misc effects
-                var miscArmorEffects = MiscEffects.Where(x => x.Property == ItemProperties.ArmorBonus || x.Property == ItemProperties.Deflection || x.Property == ItemProperties.NaturalArmor);
-                if (miscArmorEffects.Count() > 0)
-                {
-                    AC += miscArmorEffects.Sum(x => x.Value);
-                    FlatFootedACDescription += " + " + String.Join(" + ", miscArmorEffects.Select(x => x.Value + " from " + x.Source));
-                }
-                return AC;
+                    ItemProperties.ArmorBonus,
+                    ItemProperties.NaturalArmor,
+                    ItemProperties.Deflection
+                });
             }
         }
 
@@ -191,13 +146,13 @@ namespace Pathfinda.SaveData
                     if (item.Properties.ContainsKey(ItemProperties.SpellResistance))
                     {
                         spellResistance += item.Properties[ItemProperties.SpellResistance];
-                        SpellResistanceDescription += item.Properties[ItemProperties.SpellResistance] + " from " + item.Name + " + ";
+                        SpellResistanceDescription += $"{item.Properties[ItemProperties.SpellResistance]} from {item.Name} + ";
                     }
                 }
                 foreach (var thing in MiscEffects.Where(x => x.Property == ItemProperties.SpellResistance))
                 {
                     spellResistance += thing.Value;
-                    SpellResistanceDescription += thing.Value + " from " + thing.Source + " + ";
+                    SpellResistanceDescription += $"{thing.Value} from {thing.Source} + ";
                 }
                 SpellResistanceDescription.Trim(" +".ToCharArray());
                 return spellResistance;
@@ -255,7 +210,7 @@ namespace Pathfinda.SaveData
             {
                 int will = 0;
                 will += AbilityScores[Abilities.Wisdom].Modifier; // base save + con modifier + magic modifier + misc
-                WillDescription = will.ToString() + " from Wis";
+                WillDescription = $"{will.ToString()} from Wis";
                 foreach (var item in Inventory.Where(x => x.Properties.ContainsKey(ItemProperties.WillBonus)))
                 {
                     will += item.Properties[ItemProperties.WillBonus];
@@ -281,24 +236,24 @@ namespace Pathfinda.SaveData
                 if (AbilityScores[Abilities.Strength].Modifier != 0)
                 {
                     cmd += AbilityScores[Abilities.Strength].Modifier;
-                    CMDDescription += " + " + AbilityScores[Abilities.Strength].Modifier + " from Str";
+                    CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier} from Str";
                 }
                 if (AbilityScores[Abilities.Dexterity].Modifier != 0)
                 {
                     cmd += AbilityScores[Abilities.Dexterity].Modifier;
-                    CMDDescription += " + " + AbilityScores[Abilities.Dexterity].Modifier + " from Dex";
+                    CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier} from Dex";
                 }
                 if (Size.ACAndAttackBonus() != 0)
                 {
                     cmd += Size.ACAndAttackBonus();
-                    CMDDescription += " + " + Size.ACAndAttackBonus() + " from " + Size.ToString() + " Size";
+                    CMDDescription += " + {Size.ACAndAttackBonus()} from {Size.ToString()} Size";
                 }
                 foreach (var thing in MiscEffects.Where(x => x.Property == ItemProperties.CombatManeuverDefense))
                 {
                     cmd += thing.Value;
-                    CMDDescription += " + " + thing.Value + " from " + thing.Source;
+                    CMDDescription += $" + {thing.Value} from {thing.Source}";
                 }
-                CMDDescription += " + " + String.Join("/", BaseAttackBonus) + " from BAB";
+                CMDDescription += $" + {String.Join("/", BaseAttackBonus)} from BAB";
 
                 foreach (var bab in BaseAttackBonus)
                 {
