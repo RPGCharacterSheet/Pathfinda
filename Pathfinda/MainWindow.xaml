@@ -15,6 +15,7 @@
             <converters:ModifierConverter x:Key="Modifier"/>
             <converters:ModifierColorConverter x:Key="ModifierColor" />
             <converters:StringToVisibiltyConverter x:Key="StringToVisibility" />
+            <converters:BABConverter x:Key="BABConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -70,7 +71,13 @@
                     </ListBox>
                 </Border>
                 <Border BorderBrush="#FFFF0000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="BAB" Style="{StaticResource LabelStyle}" />
+                            <TextBox Text="{Binding Path=Character.BaseAttackBonus, Converter={StaticResource BABConverter}, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                        </StackPanel>
 
+                    </StackPanel>
                 </Border>
             </StackPanel>
         </Expander>

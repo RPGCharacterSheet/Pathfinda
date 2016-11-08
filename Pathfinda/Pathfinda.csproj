@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BABConverter.cs" />
     <Compile Include="Converters\ModifierColorConverter.cs" />
     <Compile Include="Converters\ModifierConverter.cs" />
     <Compile Include="Converters\StringToVisibilityConverter.cs" />

@@ -312,6 +312,7 @@ namespace Pathfinda.SaveData
         {
             get
             {
+                // TODO
                 return new List<int>() { 0 };
             }
         }
@@ -334,6 +335,10 @@ namespace Pathfinda.SaveData
 
         public int MaxHP { get; set; }
         public int CurrentHP { get; set; }
+        public double Gold { get; set; }
+        public int XPCurrent { get; set; }
+        public int XPNext { get; set; }
+        public string Languages { get; set; }
 
         #region Specified by the player and not used in any calculations
         public Alignments Alignment { get; set; }
