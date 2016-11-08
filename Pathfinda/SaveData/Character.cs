@@ -40,7 +40,7 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight))?.Max(x => x.Properties[ItemProperties.ArmorWeight]) ?? 0);
+                return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight))?.Max(x => (int?)x.Properties[ItemProperties.ArmorWeight]) ?? 0);
             }
         }
 
@@ -53,44 +53,75 @@ namespace Pathfinda.SaveData
         }
 
 
-        public int getDexModifier()
+        public int DexModifierForAC()
         {
             return Math.Min(AbilityScores[Abilities.Dexterity].Modifier, Encumbrance.MaxDexBonus());
         }
 
-        private int tryKey (Gear item, ItemProperties key,  int def = 0)
+        private int TryGetItemProperty(Gear item, ItemProperties property, int @default = 0)
         {
-            return item.Properties.ContainsKey(key) ? item.Properties[key] : def;
+            return item.Properties.ContainsKey(property) ? item.Properties[property] : @default;
         }
 
-        // Aggregate all item additions in inventory. Should we be filtering by equipped or not?
-        private int getItemsModifier(List<ItemProperties> items)
+        // Aggregate modifiers for relevant items in inventory.
+        private int SumInventoryModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed, bool mustBeEquipped = true)
         {
-            return Inventory.Sum(item => items.Sum(x => tryKey(item, x)));
+            int result = 0;
+            descriptionOfWhatGotSummed = "";
+            foreach (var item in Inventory.Where(x => x.Properties.Count > 0 && (!mustBeEquipped || x.IsEquipped)))
+            {
+                int sumOfRelevantProperties = item.Properties.Sum(x => modifiers.Contains(x.Key) ? x.Value : 0);
+                if (sumOfRelevantProperties != 0)
+                {
+                    descriptionOfWhatGotSummed += $"+{sumOfRelevantProperties} from {item.Name}";
+                    result += sumOfRelevantProperties;
+                }
+            }
+            return result;
         }
 
-        private List<MiscEffect> filterMiscEffects(List<ItemProperties> matches)
+        private int SumMiscModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed)
         {
-            return MiscEffects.Where(misc => matches.Contains(misc.Property)) as List<MiscEffect>;
+            int result = 0;
+            descriptionOfWhatGotSummed = "";
+            foreach (var effect in MiscEffects.Where(x => modifiers.Contains(x.Property)))
+            {
+                descriptionOfWhatGotSummed += $"+{effect.Value} from {effect.Source}";
+                result += effect.Value;
+            }
+            return result;
         }
 
-        private int ArmorCalculator(List<ItemProperties> modifiers)
+        private int SumInventoryAndMiscModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed)
         {
-            // misc effects
-            var miscArmorEffects = filterMiscEffects(modifiers);
+            string miscDescription = "";
+            var miscTotal = SumMiscModifiers(modifiers, out miscDescription);
+            string armorDescription = "";
+            var itemTotal = SumInventoryModifiers(modifiers, out armorDescription);
+            descriptionOfWhatGotSummed = $"{armorDescription} {miscDescription}";
+            return itemTotal + miscTotal;
+        }
+
+        private int ArmorCalculator(List<ItemProperties> modifiers, out string descriptionOfArmorBonuses)
+        {
+            string miscDescription = "";
+            var miscArmorEffects = SumMiscModifiers(modifiers, out miscDescription);
+            string armorDescription = "";
+            var itemArmor = SumInventoryModifiers(modifiers, out armorDescription);
+            descriptionOfArmorBonuses = $"10 + {DexModifierForAC()} from Dex + {Size.ACAndAttackBonus()} from Size {armorDescription} {miscArmorEffects}";
 
             return new int[]
             {
                 10,                                 //always get natural 10
-                getDexModifier(),                   //addDex
+                DexModifierForAC(),                 //add Dex
                 Size.ACAndAttackBonus(),            //Add ac from Size
-                miscArmorEffects.Sum(x => x.Value), //Add misc armor effects
-                getItemsModifier(modifiers)             //Add Modifiers from Items
+                miscArmorEffects,                   //Add misc armor effects
+                itemArmor                           //Add Modifiers from Items
             }.Sum();
         }
 
-        delegate int del(Gear item,  ItemProperties key);
-        public string ArmorClassDescription { get; private set; }
+        private string _armorClassDescription = "";
+        public string ArmorClassDescription { get { return _armorClassDescription; } }
         public int ArmorClass
         {
             get
@@ -101,61 +132,48 @@ namespace Pathfinda.SaveData
                     ItemProperties.NaturalArmor,
                     ItemProperties.Dodge,
                     ItemProperties.Deflection
-                });
+                }, out _armorClassDescription);
             }
         }
 
-        public string TouchACDescription { get; private set; }
+        private string _touchACDescription = "";
+        public string TouchACDescription { get { return _touchACDescription; } }
         public int TouchAC
         {
             get
             {
-                return ArmorCalculator(new List<ItemProperties> 
+                return ArmorCalculator(new List<ItemProperties>
                 {
                     ItemProperties.Dodge,
                     ItemProperties.Deflection
-                });
-                
+                }, out _touchACDescription);
+
             }
         }
 
-        public string FlatFootedACDescription { get; private set; }
+        private string _flatFootedACDescription = "";
+        public string FlatFootedACDescription { get { return _flatFootedACDescription; } }
         public int FlatFootedAC
         {
             get
             {
 
-                return ArmorCalculator(new List<ItemProperties> 
+                return ArmorCalculator(new List<ItemProperties>
                 {
                     ItemProperties.ArmorBonus,
                     ItemProperties.NaturalArmor,
                     ItemProperties.Deflection
-                });
+                }, out _flatFootedACDescription);
             }
         }
 
-        public string SpellResistanceDescription { get; private set; }
+        private string _spellResistanceDescription = "";
+        public string SpellResistanceDescription { get { return _spellResistanceDescription; } }
         public int SpellResistance
         {
             get
             {
-                int spellResistance = 0;
-                SpellResistanceDescription = "";
-                foreach (var item in Inventory)
-                {
-                    if (item.Properties.ContainsKey(ItemProperties.SpellResistance))
-                    {
-                        spellResistance += item.Properties[ItemProperties.SpellResistance];
-                        SpellResistanceDescription += $"{item.Properties[ItemProperties.SpellResistance]} from {item.Name} + ";
-                    }
-                }
-                foreach (var thing in MiscEffects.Where(x => x.Property == ItemProperties.SpellResistance))
-                {
-                    spellResistance += thing.Value;
-                    SpellResistanceDescription += $"{thing.Value} from {thing.Source} + ";
-                }
-                SpellResistanceDescription.Trim(" +".ToCharArray());
-                return spellResistance;
+                return SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.SpellResistance }, out _spellResistanceDescription);
             }
         }
 
@@ -164,20 +182,11 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int fort = 0;
-                fort += AbilityScores[Abilities.Constitution].Modifier; // base save + con modifier + magic modifier + misc
-                FortitudeDescription = fort.ToString() + " from Con";
-                foreach (var item in Inventory.Where(x => x.Properties.ContainsKey(ItemProperties.FortitudeBonus)))
-                {
-                    fort += item.Properties[ItemProperties.FortitudeBonus];
-                    FortitudeDescription += " + " + item.Properties[ItemProperties.FortitudeBonus] + " from " + item.Name;
-                }
-                foreach (var miscFort in MiscEffects.Where(x => x.Property == ItemProperties.FortitudeBonus))
-                {
-                    fort += miscFort.Value;
-                    FortitudeDescription += " + " + miscFort.Value + " from " + miscFort.Source;
-                }
-                return fort;
+                int fort = AbilityScores[Abilities.Constitution].Modifier; // base save + con modifier + magic modifier + misc
+                string itemEffectsDescription = "";
+                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.FortitudeBonus }, out itemEffectsDescription);
+                FortitudeDescription = $"{fort} from Con {itemEffectsDescription}";
+                return fort + itemEffects;
             }
         }
 
@@ -186,20 +195,11 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int reflex = 0;
-                reflex += AbilityScores[Abilities.Dexterity].Modifier; // base save + con modifier + magic modifier + misc
-                ReflexDescription = reflex.ToString() + " from Dex";
-                foreach (var item in Inventory.Where(x => x.Properties.ContainsKey(ItemProperties.ReflexBonus)))
-                {
-                    reflex += item.Properties[ItemProperties.ReflexBonus];
-                    ReflexDescription += " + " + item.Properties[ItemProperties.ReflexBonus] + " from " + item.Name;
-                }
-                foreach (var miscFort in MiscEffects.Where(x => x.Property == ItemProperties.ReflexBonus))
-                {
-                    reflex += miscFort.Value;
-                    ReflexDescription += " + " + miscFort.Value + " from " + miscFort.Source;
-                }
-                return reflex;
+                int reflex = AbilityScores[Abilities.Dexterity].Modifier; // base save + con modifier + magic modifier + misc
+                string itemEffectsDescription = "";
+                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.ReflexBonus }, out itemEffectsDescription);
+                ReflexDescription = $"{reflex} from Dex {itemEffectsDescription}";
+                return reflex + itemEffects;
             }
         }
 
@@ -208,20 +208,11 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int will = 0;
-                will += AbilityScores[Abilities.Wisdom].Modifier; // base save + con modifier + magic modifier + misc
-                WillDescription = $"{will.ToString()} from Wis";
-                foreach (var item in Inventory.Where(x => x.Properties.ContainsKey(ItemProperties.WillBonus)))
-                {
-                    will += item.Properties[ItemProperties.WillBonus];
-                    WillDescription += " + " + item.Properties[ItemProperties.WillBonus] + " from " + item.Name;
-                }
-                foreach (var miscFort in MiscEffects.Where(x => x.Property == ItemProperties.WillBonus))
-                {
-                    will += miscFort.Value;
-                    WillDescription += " + " + miscFort.Value + " from " + miscFort.Source;
-                }
-                return will;
+                int will = AbilityScores[Abilities.Wisdom].Modifier; // base save + con modifier + magic modifier + misc
+                string itemEffectsDescription = "";
+                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.WillBonus }, out itemEffectsDescription);
+                WillDescription = $"{will} from Wis {itemEffects}";
+                return will + itemEffects;
             }
         }
 
@@ -233,27 +224,18 @@ namespace Pathfinda.SaveData
                 List<int> cmds = new List<int>();
                 int cmd = 10;
                 CMDDescription = "10";
-                if (AbilityScores[Abilities.Strength].Modifier != 0)
-                {
-                    cmd += AbilityScores[Abilities.Strength].Modifier;
-                    CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier} from Str";
-                }
-                if (AbilityScores[Abilities.Dexterity].Modifier != 0)
-                {
-                    cmd += AbilityScores[Abilities.Dexterity].Modifier;
-                    CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier} from Dex";
-                }
-                if (Size.ACAndAttackBonus() != 0)
-                {
-                    cmd += Size.ACAndAttackBonus();
-                    CMDDescription += " + {Size.ACAndAttackBonus()} from {Size.ToString()} Size";
-                }
+                cmd += AbilityScores[Abilities.Strength].Modifier;
+                CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier} from Str";
+                cmd += AbilityScores[Abilities.Dexterity].Modifier;
+                CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier} from Dex";
+                cmd += Size.ACAndAttackBonus();
+                CMDDescription += $" + {Size.ACAndAttackBonus()} from {Size} Size";
                 foreach (var thing in MiscEffects.Where(x => x.Property == ItemProperties.CombatManeuverDefense))
                 {
                     cmd += thing.Value;
                     CMDDescription += $" + {thing.Value} from {thing.Source}";
                 }
-                CMDDescription += $" + {String.Join("/", BaseAttackBonus)} from BAB";
+                CMDDescription += $" + {string.Join("/", BaseAttackBonus)} from BAB";
 
                 foreach (var bab in BaseAttackBonus)
                 {
@@ -327,6 +309,7 @@ namespace Pathfinda.SaveData
                 {Abilities.Intelligence, new AbilityScore(Abilities.Intelligence, 10) },
                 {Abilities.Charisma, new AbilityScore(Abilities.Charisma, 18) },
             };
+            MiscEffects = new List<MiscEffect>();
             Race = Races.Human;
             Size = Sizes.Medium;
             MaxHP = 6;
