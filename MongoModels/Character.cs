@@ -11,6 +11,7 @@ namespace MongoModels
     {
         public class CharacterModel
         {
+            public BsonObjectId owner { get; private set; }
             public Dictionary<Abilities, AbilityScore> AbilityScores { get; set; }
             public List<Gear> Inventory { get; set; }
             public List<MiscEffect> MiscEffects { get; set; }
@@ -39,14 +40,19 @@ namespace MongoModels
             public int Intelligence { get { return AbilityScores[Abilities.Intelligence].Score; } }
             public int Charisma { get { return AbilityScores[Abilities.Charisma].Score; } }
             #endregion
+            public CharacterModel() { }
+            public CharacterModel(BsonObjectId own)
+            {
+                owner = own;
+            }
         }
 
         private static MongoModels.Database db;
         private static IMongoCollection<CharacterModel> collection;
 
-        public CharacterModel Model()
+        public CharacterModel Model(BsonObjectId owner = null)
         {
-            return new CharacterModel();
+            return new CharacterModel(owner);
         }
 
         static Character()
