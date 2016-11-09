@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace MongoModels.Models
 {
-    public class Feat : MongoEntityBase
+    public class Feat : ModelEntity<FeatModel>
+    {
+    }
+
+    public class FeatModel : MongoEntityBase
     {
     }
 }

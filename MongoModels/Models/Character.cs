@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace MongoModels.Models
 {
-    public class Character : MongoEntityBase
+
+    public class Character : ModelEntity<CharacterModel>
+    {
+
+    }
+
+    public class CharacterModel : MongoEntityBase
     {
         public string Name { get; set; }
         public string CreatorName { get; set; }
@@ -34,7 +40,7 @@ namespace MongoModels.Models
         public string Immunities { get; set; }
         public string Notes { get; set; }
 
-        public Character()
+        public CharacterModel()
         {
             Inventory = new List<InventoryItem>();
             AbilityScores = new Dictionary<Abilities, AbilityScore>()
