@@ -7,7 +7,7 @@ using MongoModels.Models;
 
 namespace Pathfinda.ViewModels
 {
-    public class CharacterVM : CharacterModel
+    public class CharacterVM : Character
     {
         public double GearWeight
         {
@@ -244,10 +244,6 @@ namespace Pathfinda.ViewModels
             {
                 return 30;
             }
-        }
-
-        public CharacterVM() : base()
-        {
         }
     }
 }

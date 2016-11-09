@@ -56,7 +56,7 @@ namespace Pathfinda
         {
             InitializeComponent();
             this.DataContext = this;
-            Character = new Character();
+            Character = Character.Get("user token plus character id maybe?");
         }
 
 
@@ -67,7 +67,7 @@ namespace Pathfinda
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Character = MongoModels.Database.Instance.GetSomeData<Character>("_id", "5");
+            Character.Put();
         }
     }
 }

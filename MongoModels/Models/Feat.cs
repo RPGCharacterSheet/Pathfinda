@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace MongoModels.Models
 {
-    public class Feat : ModelEntity<FeatModel>
+    public class Feat : MongoEntityBase<Feat>
     {
-    }
-
-    public class FeatModel : MongoEntityBase
-    {
+        protected Feat() : base()
+        {
+            // initialize a default feat
+        }
     }
 }

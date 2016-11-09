@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace MongoModels.Models
 {
-    public class Spell : MongoEntityBase<Spell>
+    public class CharacterClass : MongoEntityBase<CharacterClass>
     {
-        protected Spell() : base()
+        protected CharacterClass() : base()
         {
-            // initialize a default Spell
+            // initialize a default Character Class
         }
     }
 }

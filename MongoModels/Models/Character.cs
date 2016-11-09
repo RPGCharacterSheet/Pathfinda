@@ -5,14 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MongoModels.Models
-{
-
-    public class Character : ModelEntity<CharacterModel>
-    {
-
-    }
-
-    public class CharacterModel : MongoEntityBase
+{    
+    public class Character : MongoEntityBase<Character>
     {
         public string Name { get; set; }
         public string CreatorName { get; set; }
@@ -40,12 +34,12 @@ namespace MongoModels.Models
         public string Immunities { get; set; }
         public string Notes { get; set; }
 
-        public CharacterModel()
+        protected Character() : base()
         {
             Inventory = new List<InventoryItem>();
             AbilityScores = new Dictionary<Abilities, AbilityScore>()
             {
-                {Abilities.Strength, new AbilityScore(Abilities.Strength, 10) },
+                {Abilities.Strength, new AbilityScore(Abilities.Strength, 8) },
                 {Abilities.Constitution, new AbilityScore(Abilities.Constitution, 10) },
                 {Abilities.Dexterity,  new AbilityScore(Abilities.Dexterity, 10) },
                 {Abilities.Wisdom,  new AbilityScore(Abilities.Wisdom, 10) },
