@@ -1,4 +1,4 @@
-﻿using Pathfinda.SaveData;
+﻿using MongoModels.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -63,6 +63,11 @@ namespace Pathfinda
         private void TextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             System.Diagnostics.Process.Start("http://paizo.com/pathfinderRPG/prd/ultimateCampaign/campaignSystems/alignment.html");
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Character = MongoModels.Database.Instance.GetSomeData<Character>("_id", "5");
         }
     }
 }

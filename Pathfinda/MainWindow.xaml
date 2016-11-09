@@ -31,6 +31,7 @@
         </Grid.RowDefinitions>
         <Expander Grid.Row="0" x:Name="CharacterDescriptionExpander" IsExpanded="True" Header="Character Description">
             <WrapPanel FlowDirection="LeftToRight">
+                <Button Content="Load from Mongo" Click="Button_Click" Margin="5" />
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Character Name" Style="{StaticResource LabelStyle}"/>
                     <TextBox x:Name="CharacterName" Text="Felicia" Style="{StaticResource InputStyle}" />

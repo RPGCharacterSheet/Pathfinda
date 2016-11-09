@@ -3,62 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoModels.Models;
 
-namespace Pathfinda.SaveData
+namespace Pathfinda.ViewModels
 {
-    public class Character
+    public class CharacterVM : Character
     {
-        public class MiscEffect
-        {
-            public ItemProperties Property { get; set; }
-            public int Value { get; set; }
-            public string Source { get; set; }
-        }
-
-        public Dictionary<Abilities, AbilityScore> AbilityScores { get; set; }
-        public List<Gear> Inventory { get; set; }
-        public List<MiscEffect> MiscEffects { get; set; }
-        public Races Race { get; set; }
-        public Sizes Size { get; set; }
         public double GearWeight
         {
-            get
-            {
-                return Inventory?.Sum(x => x.WeightCounts ? x.Weight : 0) ?? 0;
-            }
+            get { return Inventory?.Sum(x => x.WeightCounts ? x.Weight : 0) ?? 0; }
         }
 
         public Loads EncumbranceByWeight
         {
-            get
-            {
-                return Formulas.GetEncumbrance(GearWeight, AbilityScores[Abilities.Strength].Score, Size);
-            }
+            get { return Formulas.GetEncumbrance(GearWeight, AbilityScores[Abilities.Strength].Score, Size); }
         }
 
         public Loads EncumbranceByArmor
         {
-            get
-            {
-                return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight))?.Max(x => (int?)x.Properties[ItemProperties.ArmorWeight]) ?? 0);
-            }
+            get { return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight))?.Max(x => (int?)x.Properties[ItemProperties.ArmorWeight]) ?? 0); }
         }
 
         public Loads Encumbrance
         {
-            get
-            {
-                return (Loads)Math.Max((int)EncumbranceByWeight, (int)EncumbranceByArmor);
-            }
+            get { return (Loads)Math.Max((int)EncumbranceByWeight, (int)EncumbranceByArmor); }
         }
 
-
-        public int DexModifierForAC()
+        public int DexModifierForAC
         {
-            return Math.Min(AbilityScores[Abilities.Dexterity].Modifier, Encumbrance.MaxDexBonus());
+            get { return Math.Min(AbilityScores[Abilities.Dexterity].Modifier(), Encumbrance.MaxDexBonus()); }
         }
 
-        private int TryGetItemProperty(Gear item, ItemProperties property, int @default = 0)
+        private int TryGetItemProperty(InventoryItem item, ItemProperties property, int @default = 0)
         {
             return item.Properties.ContainsKey(property) ? item.Properties[property] : @default;
         }
@@ -84,9 +60,9 @@ namespace Pathfinda.SaveData
         {
             int result = 0;
             descriptionOfWhatGotSummed = "";
-            foreach (var effect in MiscEffects.Where(x => modifiers.Contains(x.Property)))
+            foreach (var effect in CharacterModifiers.Where(x => modifiers.Contains(x.PropertyModified)))
             {
-                descriptionOfWhatGotSummed += $"+{effect.Value} from {effect.Source}";
+                descriptionOfWhatGotSummed += $"+{effect.Value} from {effect.ModificationReason}";
                 result += effect.Value;
             }
             return result;
@@ -108,12 +84,12 @@ namespace Pathfinda.SaveData
             var miscArmorEffects = SumMiscModifiers(modifiers, out miscDescription);
             string armorDescription = "";
             var itemArmor = SumInventoryModifiers(modifiers, out armorDescription);
-            descriptionOfArmorBonuses = $"10 + {DexModifierForAC()} from Dex + {Size.ACAndAttackBonus()} from Size {armorDescription} {miscArmorEffects}";
+            descriptionOfArmorBonuses = $"10 + {DexModifierForAC} from Dex + {Size.ACAndAttackBonus()} from Size {armorDescription} {miscArmorEffects}";
 
             return new int[]
             {
                 10,                                 //always get natural 10
-                DexModifierForAC(),                 //add Dex
+                DexModifierForAC,                   //add Dex
                 Size.ACAndAttackBonus(),            //Add ac from Size
                 miscArmorEffects,                   //Add misc armor effects
                 itemArmor                           //Add Modifiers from Items
@@ -182,7 +158,7 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int fort = AbilityScores[Abilities.Constitution].Modifier; // base save + con modifier + magic modifier + misc
+                int fort = AbilityScores[Abilities.Constitution].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.FortitudeBonus }, out itemEffectsDescription);
                 FortitudeDescription = $"{fort} from Con {itemEffectsDescription}";
@@ -195,7 +171,7 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int reflex = AbilityScores[Abilities.Dexterity].Modifier; // base save + con modifier + magic modifier + misc
+                int reflex = AbilityScores[Abilities.Dexterity].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.ReflexBonus }, out itemEffectsDescription);
                 ReflexDescription = $"{reflex} from Dex {itemEffectsDescription}";
@@ -208,7 +184,7 @@ namespace Pathfinda.SaveData
         {
             get
             {
-                int will = AbilityScores[Abilities.Wisdom].Modifier; // base save + con modifier + magic modifier + misc
+                int will = AbilityScores[Abilities.Wisdom].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.WillBonus }, out itemEffectsDescription);
                 WillDescription = $"{will} from Wis {itemEffects}";
@@ -224,16 +200,16 @@ namespace Pathfinda.SaveData
                 List<int> cmds = new List<int>();
                 int cmd = 10;
                 CMDDescription = "10";
-                cmd += AbilityScores[Abilities.Strength].Modifier;
-                CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier} from Str";
-                cmd += AbilityScores[Abilities.Dexterity].Modifier;
-                CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier} from Dex";
+                cmd += AbilityScores[Abilities.Strength].Modifier();
+                CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier()} from Str";
+                cmd += AbilityScores[Abilities.Dexterity].Modifier();
+                CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier()} from Dex";
                 cmd += Size.ACAndAttackBonus();
                 CMDDescription += $" + {Size.ACAndAttackBonus()} from {Size} Size";
-                foreach (var thing in MiscEffects.Where(x => x.Property == ItemProperties.CombatManeuverDefense))
+                foreach (var thing in CharacterModifiers.Where(x => x.PropertyModified == ItemProperties.CombatManeuverDefense))
                 {
                     cmd += thing.Value;
-                    CMDDescription += $" + {thing.Value} from {thing.Source}";
+                    CMDDescription += $" + {thing.Value} from {thing.ModificationReason}";
                 }
                 CMDDescription += $" + {string.Join("/", BaseAttackBonus)} from BAB";
 
@@ -270,50 +246,8 @@ namespace Pathfinda.SaveData
             }
         }
 
-        public int MaxHP { get; set; }
-        public int CurrentHP { get; set; }
-        public double Gold { get; set; }
-        public int XPCurrent { get; set; }
-        public int XPNext { get; set; }
-        public string Languages { get; set; }
-
-        #region Specified by the player and not used in any calculations
-        public Alignments Alignment { get; set; }
-        public string Deity { get; set; }
-        public string Homeland { get; set; }
-        public string Age { get; set; }
-        public string Gender { get; set; }
-        public string Height { get; set; }
-        public string Weight { get; set; }
-        public string DamageReduction { get; set; }
-        public string Resistances { get; set; }
-        public string Immunities { get; set; }
-        public string Notes { get; set; }
-        //public int Strength { get { return AbilityScores[Abilities.Strength].Score; } }
-        //public int Dexterity { get { return AbilityScores[Abilities.Dexterity].Score; } }
-        //public int Constitution { get { return AbilityScores[Abilities.Constitution].Score; } }
-        //public int Wisdom { get { return AbilityScores[Abilities.Wisdom].Score; } }
-        //public int Intelligence { get { return AbilityScores[Abilities.Intelligence].Score; } }
-        //public int Charisma { get { return AbilityScores[Abilities.Charisma].Score; } }
-        #endregion
-
-        public Character()
+        public CharacterVM() : base()
         {
-            Inventory = new List<Gear>();
-            AbilityScores = new Dictionary<Abilities, AbilityScore>()
-            {
-                {Abilities.Strength, new AbilityScore(Abilities.Strength, 7) },
-                {Abilities.Constitution, new AbilityScore(Abilities.Constitution, 10) },
-                {Abilities.Dexterity,  new AbilityScore(Abilities.Dexterity, 10) },
-                {Abilities.Wisdom,  new AbilityScore(Abilities.Wisdom, 10) },
-                {Abilities.Intelligence, new AbilityScore(Abilities.Intelligence, 10) },
-                {Abilities.Charisma, new AbilityScore(Abilities.Charisma, 18) },
-            };
-            MiscEffects = new List<MiscEffect>();
-            Race = Races.Human;
-            Size = Sizes.Medium;
-            MaxHP = 6;
-            CurrentHP = 2;
         }
     }
 }

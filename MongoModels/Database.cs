@@ -17,7 +17,20 @@ namespace MongoModels
         private static Database _instance;
         public static Database Instance
         {
-            get { return (_instance == null) ? _instance = new Database() : _instance; }
+            get { return (_instance ?? (_instance = new Database())); }
+        }
+
+        public T GetSomeData<T>(string uniqueField, string dataInUniqueField) where T : MongoEntityBase
+        {
+            var allOfEm = db.GetCollection<T>(typeof(T).Name);
+            return allOfEm.Find(doc => doc._id as string == dataInUniqueField).First();
+        }
+
+        public bool PutSomeData<T>(T insertOrUpdate) where T : MongoEntityBase
+        {
+            bool worked = false;
+            // I have no idea
+            return worked;
         }
 
         private Database()

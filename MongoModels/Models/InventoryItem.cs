@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pathfinda.SaveData
+namespace MongoModels.Models
 {
-    /// <summary>
-    /// Could be armor, weapons, scrolls, rope, whatever
-    /// </summary>
-    public class Gear
+    public class InventoryItem
     {
         public string Name { get; set; }
         public bool IsEquipped { get; set; } = false;
@@ -39,18 +36,17 @@ namespace Pathfinda.SaveData
         /// </summary>
         public string Critical { get; set; }
         /// <summary>
-        /// e.g. Nonlethal, disarm, breaks on critical fail
+        /// e.g. Disarm, breaks on critical fail, talks
         /// </summary>
         public string Special { get; set; }
 
         public Dictionary<ItemProperties, int> Properties { get; set; }
         public List<ItemDescriptors> Descriptors { get; set; }
 
-        public Gear()
+        public InventoryItem()
         {
             Properties = new Dictionary<ItemProperties, int>();
             Descriptors = new List<ItemDescriptors>();
         }
     }
-
 }
