@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Database.cs" />
     <Compile Include="Feats.cs" />
+    <Compile Include="ModelEntity.cs" />
     <Compile Include="Models\AbilityScore.cs" />
     <Compile Include="Models\Character.cs" />
     <Compile Include="Models\CharacterModifier.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Models\Spell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spells.cs" />
+    <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
