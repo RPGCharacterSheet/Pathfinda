@@ -56,9 +56,29 @@ namespace Pathfinda
         {
             InitializeComponent();
             this.DataContext = this;
-            Character = Character.Get("user token plus character id maybe?");
+            Loaded += MainWindow_Loaded;
+        }
+        private userModel user = null;
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Login loginWindow = new Login();
+            loginWindow.Owner = this;
+            loginWindow.LoginAttempt += LoginWindow_LoginAttempt;
+            loginWindow.NewUserAttempt += LoginWindow_NewUserAttempt;
+            loginWindow.ShowDialog();
         }
 
+        private void LoginWindow_NewUserAttempt(string username, string password)
+        {
+            user = MongoModels.User.UserModel.newUser(username, password);
+            Character = Character.Get(user, "user token plus character id maybe?");
+        }
+
+        private void LoginWindow_LoginAttempt(string username, string password)
+        {
+            user = MongoModels.User.UserModel.getUser(username, password);
+            Character = Character.Get(user, "user token plus character id maybe?");
+        }
 
         private void TextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -67,7 +87,7 @@ namespace Pathfinda
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Character.Put();
+            //Character.Put();
         }
     }
 }
