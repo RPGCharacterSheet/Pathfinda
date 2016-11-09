@@ -10,13 +10,12 @@ namespace MongoModels
 {
     public class ModelEntity <T> where T : MongoEntityBase
     {
-        static IMongoCollection<T> collection;
-        static Database db;
+        public static IMongoCollection<T> collection;
+        public static Database db;
 
         public T GetSomeData(string uniqueField, ObjectId dataInUniqueField)
         {
-            var allOfEm = db.db.GetCollection<T>(typeof(T).Name);
-            return allOfEm.Find(doc => doc._id == dataInUniqueField).First();
+            return collection.Find(doc => doc._id == dataInUniqueField).First();
 
             //or this could work if you like linq as better
             //return (from e in allOfEm.AsQueryable<t>()
@@ -49,8 +48,7 @@ namespace MongoModels
             //In shell this is db[typeof(T)].update(query, objectToOverwrite)
             //In c#
 
-            return db.db
-                .GetCollection<T>(typeof(T).Name)
+            return collection
                 .FindOneAndReplace<T>(
                     filter: doc => doc._id == insertOrUpdate._id,
                     replacement: insertOrUpdate
@@ -59,6 +57,7 @@ namespace MongoModels
 
         static ModelEntity()
         {
+            
             db = Database.Instance;
             collection = db.db.GetCollection<T>(typeof(T).Name);
         }
