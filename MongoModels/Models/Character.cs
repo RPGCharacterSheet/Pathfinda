@@ -13,7 +13,7 @@ namespace MongoModels.Models
         public string Name { get; set; }
         public string CreatorName { get; set; }
         public Races Race { get; set; }
-        public Dictionary<int, AbilityScore> AbilityScores { get; set; }
+        public Dictionary<string, AbilityScore> AbilityScores { get; set; }
         public List<InventoryItem> Inventory { get; set; }
         public List<CharacterModifier> CharacterModifiers { get; set; }
         public List<Spell> SpellsKnown { get; set; }
@@ -39,14 +39,14 @@ namespace MongoModels.Models
         protected Character() : base()
         {
             Inventory = new List<InventoryItem>();
-            AbilityScores = new Dictionary<int, AbilityScore>()
+            AbilityScores = new Dictionary<string, AbilityScore>()
             {
-                {(int)Abilities.Strength, new AbilityScore(Abilities.Strength, 8) },
-                {(int)Abilities.Constitution, new AbilityScore(Abilities.Constitution, 10) },
-                {(int)Abilities.Dexterity,  new AbilityScore(Abilities.Dexterity, 10) },
-                {(int)Abilities.Wisdom,  new AbilityScore(Abilities.Wisdom, 10) },
-                {(int)Abilities.Intelligence, new AbilityScore(Abilities.Intelligence, 10) },
-                {(int)Abilities.Charisma, new AbilityScore(Abilities.Charisma, 10) },
+                {Abilities.Strength.ToString(), new AbilityScore(Abilities.Strength, 8) },
+                {Abilities.Constitution.ToString(), new AbilityScore(Abilities.Constitution, 10) },
+                {Abilities.Dexterity.ToString(),  new AbilityScore(Abilities.Dexterity, 10) },
+                {Abilities.Wisdom.ToString(),  new AbilityScore(Abilities.Wisdom, 10) },
+                {Abilities.Intelligence.ToString(), new AbilityScore(Abilities.Intelligence, 10) },
+                {Abilities.Charisma.ToString(), new AbilityScore(Abilities.Charisma, 10) },
             };
             CharacterModifiers = new List<CharacterModifier>();
             Race = Races.Human;

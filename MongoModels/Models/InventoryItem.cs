@@ -43,12 +43,12 @@ namespace MongoModels.Models
         /// <summary>
         /// Key is ItemProperties enum
         /// </summary>
-        public Dictionary<int, int> Properties { get; set; }
+        public Dictionary<string, int> Properties { get; set; }
         public List<ItemDescriptors> Descriptors { get; set; }
 
         public InventoryItem()
         {
-            Properties = new Dictionary<int, int>();
+            Properties = new Dictionary<string, int>();
             Descriptors = new List<ItemDescriptors>();
         }
     }
