@@ -15,7 +15,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
 namespace Pathfinda
 {
     /// <summary>
@@ -32,8 +31,8 @@ namespace Pathfinda
             }
         }
 
-        private Character _character = null;
-        public Character Character
+        private List<Character> _character = null;
+        public List<Character > Characters
         {
             get
             {
@@ -58,7 +57,7 @@ namespace Pathfinda
             this.DataContext = this;
             Loaded += MainWindow_Loaded;
         }
-        private userModel user = null;
+        private User user = new User();
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Login loginWindow = new Login();
@@ -70,14 +69,20 @@ namespace Pathfinda
 
         private void LoginWindow_NewUserAttempt(string username, string password)
         {
-            user = MongoModels.User.UserModel.newUser(username, password);
-            Character = Character.Get(user, "user token plus character id maybe?");
+            user.newUser(username, password);
+            Characters = new List<Character>();
         }
 
         private void LoginWindow_LoginAttempt(string username, string password)
         {
-            user = MongoModels.User.UserModel.getUser(username, password);
-            Character = Character.Get(user, "user token plus character id maybe?");
+            var u = user.getUser(username, password);
+            if(u != null)
+            {
+                Characters = CharacterClass.getUserCharacters(u);
+            } else
+            {
+                Console.WriteLine("bad user or password");
+            }
         }
 
         private void TextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)

@@ -8,9 +8,9 @@ using System.Security.Cryptography;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Driver.Linq;
-namespace MongoModels
+namespace MongoModels.Models
 {
-    public class User : MongoEntityBase<MongoModels.User.UserModel> //Really did not like <UserModel>
+    public class User : MongoEntityBase<User.UserModel>
     {
         //Model to store in database
         public class UserModel : MongoEntityBase
@@ -45,11 +45,12 @@ namespace MongoModels
 
         public UserModel getUser(string username, string password)
         {
-            return (
+            var cursor = (
                 from e in collection.AsQueryable<UserModel>()
                 where e.UserName == username && e.Password == encodePassword(username, password)
                 select e
-            ).First();
+            );
+            return cursor.Count() > 0 ? cursor.First() : null;
         }
     }
 }

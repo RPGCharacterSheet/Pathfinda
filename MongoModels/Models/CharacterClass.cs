@@ -10,9 +10,9 @@ namespace MongoModels.Models
     public class CharacterClass : MongoEntityBase<Character>
     {
         //Get characters a user owns
-        public List<Character> getUsersCharacter(User.UserModel user)
+        public static List<Character> getUserCharacters(User.UserModel user)
         {
-            return (from e in collection.AsQueryable() where e.Owner == user._id select e) as List<Character>;
+            return ((from e in collection.AsQueryable() where e.Owner == user._id select e) as List<Character>)?? new List<Character>();
         }
 
         protected CharacterClass() : base()

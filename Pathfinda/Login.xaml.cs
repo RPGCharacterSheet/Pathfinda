@@ -35,7 +35,7 @@ namespace Pathfinda
 
         private void Finish()
         {
-            LoginAttempt?.Invoke(username.Text, password.Text);
+            LoginAttempt?.Invoke(username.Text, password.Password);
         }
 
         private void text_KeyDown(object sender, KeyEventArgs e)
@@ -53,7 +53,7 @@ namespace Pathfinda
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            NewUserAttempt?.Invoke(username.Text, password.Text);
+            NewUserAttempt?.Invoke(username.Text, password.Password);
         }
     }
 }
