@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MongoModels.Models
 {    
-    public class Character : MongoEntityBase<Character>
+    public class Character : MongoEntityBase
     {
         public string Name { get; set; }
         public string CreatorName { get; set; }
