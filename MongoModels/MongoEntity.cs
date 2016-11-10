@@ -22,17 +22,28 @@ namespace MongoModels
             return collection.Find(doc => doc._id == id).First();
         }
         //overwrite the character currently stored in the database
-        public async Task<T> Put(T puts)
+        public static async Task<T> Put(T puts)
         {
             return await collection
                 .FindOneAndReplaceAsync<T>(
-                    filter: doc => doc._id == this._id,
+                    filter: doc => doc._id == puts._id,
                     replacement: (puts),
                     options: new FindOneAndReplaceOptions<T> { IsUpsert= true }
                 );
         }
+
+        public static T PutSync(T puts)
+        {
+            return collection
+                .FindOneAndReplace<T>(
+                    filter: doc => doc._id == puts._id,
+                    replacement: (puts),
+                    options: new FindOneAndReplaceOptions<T> { IsUpsert = true }
+                );
+        }
+
         // don't let anybody make a Character, or Feat, or Spell. Force them to call Character.Create()
-        public T Create()
+        public static T Create()
         {
             var createdT = Activator.CreateInstance(typeof(T), true) as T;
             collection.InsertOne(createdT);

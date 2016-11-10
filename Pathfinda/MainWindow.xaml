@@ -19,6 +19,11 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
+        <ListBox ItemsSource="{Binding Characters}" >
+            <ListBox.ItemTemplate>
+                <ItemContainerTemplate>
+            
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -185,6 +190,9 @@
         <Expander Grid.Row="6" x:Name="NotesExpander" IsExpanded="True" Header="Notes">
             <TextBox TextWrapping="Wrap" Height="300" />
         </Expander>
-
+        </Grid>
+                </ItemContainerTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Window>

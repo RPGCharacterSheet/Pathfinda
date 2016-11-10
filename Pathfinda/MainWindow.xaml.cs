@@ -1,4 +1,5 @@
 ﻿using MongoModels.Models;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,9 +31,23 @@ namespace Pathfinda
                 return returnValue;
             }
         }
-
-        private List<Character> _character = null;
+        //List of available Characters
+        private List<Character> _characters = null;
         public List<Character > Characters
+        {
+            get
+            {
+                return _characters;
+            }
+            set
+            {
+                _characters = value;
+                Notify("Characters");
+            }
+        }
+        //Character selected to be altered
+        private Character _character;
+        public Character Character
         {
             get
             {
@@ -42,6 +57,7 @@ namespace Pathfinda
             {
                 _character = value;
                 Notify("Character");
+                CharacterClass.PutSync(value);
             }
         }
 
@@ -69,8 +85,10 @@ namespace Pathfinda
 
         private void LoginWindow_NewUserAttempt(string username, string password)
         {
-            user.newUser(username, password);
-            Characters = new List<Character>();
+            var u = user.newUser(username, password);
+            Character = CharacterClass.Create();
+            Character.Owner = u._id;
+            Characters = new List<Character>() { Character };
         }
 
         private void LoginWindow_LoginAttempt(string username, string password)
@@ -79,6 +97,11 @@ namespace Pathfinda
             if(u != null)
             {
                 Characters = CharacterClass.getUserCharacters(u);
+                if(Characters == null)
+                {
+                    Character = CharacterClass.Create();
+                    Characters = new List<Character> { Character };
+                }
             } else
             {
                 Console.WriteLine("bad user or password");
