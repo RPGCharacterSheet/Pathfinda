@@ -8,9 +8,9 @@ using System.Security.Cryptography;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Driver.Linq;
-namespace MongoModels.Models
+namespace MongoModels
 {
-    public class User : MongoEntityBase<MongoModels.Models.User.UserModel> //Really did not like <UserModel>
+    public class User : MongoEntityBase<MongoModels.User.UserModel> //Really did not like <UserModel>
     {
         //Model to store in database
         public class UserModel : MongoEntityBase
