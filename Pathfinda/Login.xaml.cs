@@ -11,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
+using MongoModels.Models;
 namespace Pathfinda
 {
     /// <summary>
@@ -19,11 +19,15 @@ namespace Pathfinda
     /// </summary>
     public partial class Login : Window
     {
-        public event Action<string, string> LoginAttempt = null;
-        public event Action<string, string> NewUserAttempt = null;
-
+        public delegate User.UserModel LoginAttempt(string username, string password);
+        private LoginAttempt login;
+        public delegate User.UserModel NewUserAttempt(string username, string password);
+        private NewUserAttempt newUser;
+        public User user = new User();
         public Login()
         {
+            login = (username, password) => user.getUser(username, password);
+            newUser = (string username, string password) => user.newUser(username, password);
             InitializeComponent();
             Loaded += Login_Loaded;
         }
@@ -35,7 +39,7 @@ namespace Pathfinda
 
         private void Finish()
         {
-            LoginAttempt?.Invoke(username.Text, password.Text);
+            login?.Invoke(username.Text, password.Password);
         }
 
         private void text_KeyDown(object sender, KeyEventArgs e)
@@ -49,11 +53,20 @@ namespace Pathfinda
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Finish();
+
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            NewUserAttempt?.Invoke(username.Text, password.Text);
+            var NewUser = newUser?.Invoke(username.Text, password.Password);
+            if(NewUser != null)
+            {
+                Console.WriteLine("Logged In!");
+                //Console.WriteLine(NewUser._id);
+                Console.WriteLine(NewUser.UserName);
+                Console.WriteLine(NewUser.Password);
+
+            }
         }
     }
 }
