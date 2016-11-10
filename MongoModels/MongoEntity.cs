@@ -14,26 +14,31 @@ namespace MongoModels
     public abstract class MongoEntityBase<T> : MongoEntityBase where T : MongoEntityBase
     {
 
-        // T will be Character, or Feat, or whatever
-        public static T Get(ObjectId id)
-        {
-            var collection = Database.Instance.db.GetCollection<T>(typeof(T).Name);
-            return collection.Find(doc => doc._id == id).First();
 
+        public static IMongoCollection<T> collection = Database.Instance.db.GetCollection<T>(typeof(T).Name);
+        // T will be Character, or Feat, or whatever
+        public static T GetById(ObjectId id)
+        {
+            return collection.Find(doc => doc._id == id).First();
         }
         //overwrite the character currently stored in the database
-        public static Task<T> Put(T replacement)
+        public async Task<T> Put(T puts)
         {
-            var collection = Database.Instance.db.GetCollection<T>(typeof(T).Name);
-            return collection
+            return await collection
                 .FindOneAndReplaceAsync<T>(
-                    filter: doc => doc._id == replacement._id,
-                    replacement: replacement
+                    filter: doc => doc._id == this._id,
+                    replacement: (puts),
+                    options: new FindOneAndReplaceOptions<T> { IsUpsert= true }
                 );
         }
-
-        // don't let anybody make a Character, or Feat, or Spell. Force them to call Character.Get()
-        //What if they want to create a new character?
+        // don't let anybody make a Character, or Feat, or Spell. Force them to call Character.Create()
+        public T Create()
+        {
+            var createdT = Activator.CreateInstance(typeof(T), true) as T;
+            collection.InsertOne(createdT);
+            return createdT;
+        }
+        
         protected MongoEntityBase()
         {
 
