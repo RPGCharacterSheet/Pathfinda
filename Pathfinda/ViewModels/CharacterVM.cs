@@ -16,12 +16,12 @@ namespace Pathfinda.ViewModels
 
         public Loads EncumbranceByWeight
         {
-            get { return Formulas.GetEncumbrance(GearWeight, AbilityScores[Abilities.Strength].Score, Size); }
+            get { return Formulas.GetEncumbrance(GearWeight, AbilityScores[(int)Abilities.Strength].Score, Size); }
         }
 
         public Loads EncumbranceByArmor
         {
-            get { return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight))?.Max(x => (int?)x.Properties[ItemProperties.ArmorWeight]) ?? 0); }
+            get { return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == (int)ItemProperties.ArmorWeight))?.Max(x => (int?)x.Properties[(int)ItemProperties.ArmorWeight]) ?? 0); }
         }
 
         public Loads Encumbrance
@@ -31,12 +31,12 @@ namespace Pathfinda.ViewModels
 
         public int DexModifierForAC
         {
-            get { return Math.Min(AbilityScores[Abilities.Dexterity].Modifier(), Encumbrance.MaxDexBonus()); }
+            get { return Math.Min(AbilityScores[(int)Abilities.Dexterity].Modifier(), Encumbrance.MaxDexBonus()); }
         }
 
         private int TryGetItemProperty(InventoryItem item, ItemProperties property, int @default = 0)
         {
-            return item.Properties.ContainsKey(property) ? item.Properties[property] : @default;
+            return item.Properties.ContainsKey((int)property) ? item.Properties[(int)property] : @default;
         }
 
         // Aggregate modifiers for relevant items in inventory.
@@ -46,7 +46,7 @@ namespace Pathfinda.ViewModels
             descriptionOfWhatGotSummed = "";
             foreach (var item in Inventory.Where(x => x.Properties.Count > 0 && (!mustBeEquipped || x.IsEquipped)))
             {
-                int sumOfRelevantProperties = item.Properties.Sum(x => modifiers.Contains(x.Key) ? x.Value : 0);
+                int sumOfRelevantProperties = item.Properties.Sum(x => modifiers.Contains((ItemProperties)x.Key) ? x.Value : 0);
                 if (sumOfRelevantProperties != 0)
                 {
                     descriptionOfWhatGotSummed += $"+{sumOfRelevantProperties} from {item.Name}";
@@ -158,7 +158,7 @@ namespace Pathfinda.ViewModels
         {
             get
             {
-                int fort = AbilityScores[Abilities.Constitution].Modifier(); // base save + con modifier + magic modifier + misc
+                int fort = AbilityScores[(int)Abilities.Constitution].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.FortitudeBonus }, out itemEffectsDescription);
                 FortitudeDescription = $"{fort} from Con {itemEffectsDescription}";
@@ -171,7 +171,7 @@ namespace Pathfinda.ViewModels
         {
             get
             {
-                int reflex = AbilityScores[Abilities.Dexterity].Modifier(); // base save + con modifier + magic modifier + misc
+                int reflex = AbilityScores[(int)Abilities.Dexterity].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.ReflexBonus }, out itemEffectsDescription);
                 ReflexDescription = $"{reflex} from Dex {itemEffectsDescription}";
@@ -184,7 +184,7 @@ namespace Pathfinda.ViewModels
         {
             get
             {
-                int will = AbilityScores[Abilities.Wisdom].Modifier(); // base save + con modifier + magic modifier + misc
+                int will = AbilityScores[(int)Abilities.Wisdom].Modifier(); // base save + con modifier + magic modifier + misc
                 string itemEffectsDescription = "";
                 int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.WillBonus }, out itemEffectsDescription);
                 WillDescription = $"{will} from Wis {itemEffects}";
@@ -200,10 +200,10 @@ namespace Pathfinda.ViewModels
                 List<int> cmds = new List<int>();
                 int cmd = 10;
                 CMDDescription = "10";
-                cmd += AbilityScores[Abilities.Strength].Modifier();
-                CMDDescription += $" + {AbilityScores[Abilities.Strength].Modifier()} from Str";
-                cmd += AbilityScores[Abilities.Dexterity].Modifier();
-                CMDDescription += $" + {AbilityScores[Abilities.Dexterity].Modifier()} from Dex";
+                cmd += AbilityScores[(int)Abilities.Strength].Modifier();
+                CMDDescription += $" + {AbilityScores[(int)Abilities.Strength].Modifier()} from Str";
+                cmd += AbilityScores[(int)Abilities.Dexterity].Modifier();
+                CMDDescription += $" + {AbilityScores[(int)Abilities.Dexterity].Modifier()} from Dex";
                 cmd += Size.ACAndAttackBonus();
                 CMDDescription += $" + {Size.ACAndAttackBonus()} from {Size} Size";
                 foreach (var thing in CharacterModifiers.Where(x => x.PropertyModified == ItemProperties.CombatManeuverDefense))

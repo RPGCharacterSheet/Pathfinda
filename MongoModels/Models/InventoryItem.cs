@@ -40,12 +40,15 @@ namespace MongoModels.Models
         /// </summary>
         public string Special { get; set; }
 
-        public Dictionary<ItemProperties, int> Properties { get; set; }
+        /// <summary>
+        /// Key is ItemProperties enum
+        /// </summary>
+        public Dictionary<int, int> Properties { get; set; }
         public List<ItemDescriptors> Descriptors { get; set; }
 
         public InventoryItem()
         {
-            Properties = new Dictionary<ItemProperties, int>();
+            Properties = new Dictionary<int, int>();
             Descriptors = new List<ItemDescriptors>();
         }
     }
