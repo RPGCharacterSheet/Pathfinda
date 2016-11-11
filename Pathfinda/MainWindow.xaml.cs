@@ -25,15 +25,15 @@ namespace Pathfinda
     {
         public ObservableCollection<string> Alignments
         {
-            get 
+            get
             {
                 var returnValue = new ObservableCollection<string>(Enum.GetValues(typeof(Alignments)).OfType<Alignments>().Select(x => x.ToSentence()));
                 return returnValue;
             }
         }
         //List of available Characters
-        private List<Character> _characters = null;
-        public List<Character > Characters
+        private ObservableCollection<Character> _characters = null;
+        public ObservableCollection<Character> Characters
         {
             get
             {
@@ -57,9 +57,17 @@ namespace Pathfinda
             {
                 _character = value;
                 Notify("Character");
-                CharacterClass.PutSync(value);
             }
         }
+
+        private User.UserModel _user;
+
+        public User.UserModel User
+        {
+            get { return _user; }
+            set { _user = value; Notify("User"); }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Notify(string propertyName)
@@ -73,7 +81,6 @@ namespace Pathfinda
             this.DataContext = this;
             Loaded += MainWindow_Loaded;
         }
-        private User user = new User();
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Login loginWindow = new Login();
@@ -85,29 +92,30 @@ namespace Pathfinda
 
         private void LoginWindow_NewUserAttempt(string username, string password)
         {
-            var u = user.newUser(username, password);
-            _character = CharacterClass.Create();
-            Character.Owner = u._id;
-            Characters = new List<Character>() { Character };
+            User = MongoModels.Models.User.newUser(username, password);
+            Character = CharacterClass.Create();
+            Character.Owner = User._id;
+            Characters = new ObservableCollection<Character>() { Character };
         }
 
         private void LoginWindow_LoginAttempt(string username, string password)
         {
-            var u = user.getUser(username, password);
-            if(u != null)
+            User = MongoModels.Models.User.getUser(username, password);
+            if (User != null)
             {
-                Characters = CharacterClass.getUserCharacters(u);
-                if(Characters == null)
+                Characters = new ObservableCollection<Character>(CharacterClass.getUserCharacters(User));
+                if (Characters == null)
                 {
-                    _character = CharacterClass.Create();
-                    Character.Owner = u._id;
-                    Characters = new List<Character> { Character };
+                    Character = CharacterClass.Create();
+                    Character.Owner = User._id;
+                    Characters = new ObservableCollection<Character> { Character };
                 }
                 else
                 {
-                    _character = Characters[0];
+                    Character = Characters[0];
                 }
-            } else
+            }
+            else
             {
                 Console.WriteLine("bad user or password");
             }
@@ -121,6 +129,19 @@ namespace Pathfinda
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             await CharacterClass.Put(Character);
+        }
+
+        private void LoadCharacterButton(object sender, RoutedEventArgs e)
+        {
+            var button = (sender as Button);
+            Character = Characters.Where(x => x.Name == button.Content.ToString()).FirstOrDefault();
+        }
+
+        private void AddCharacterButton(object sender, RoutedEventArgs e)
+        {
+            Character = CharacterClass.Create();
+            Character.Owner = User._id;
+            Characters.Add(Character);
         }
     }
 }

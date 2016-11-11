@@ -22,7 +22,7 @@ namespace MongoModels.Models
 
         static HashAlgorithm hashAlgorithm = SHA512.Create();
 
-        private string encodePassword(string user, string password)
+        private static string encodePassword(string user, string password)
         {
             byte[] salt = (byte[])Encoding.Unicode.GetBytes(user);
             List<byte> buffer =
@@ -32,7 +32,7 @@ namespace MongoModels.Models
             return System.Text.Encoding.UTF8.GetString(computedHash);
         }
 
-        public UserModel newUser(string username, string password)
+        public static UserModel newUser(string username, string password)
         {
             var user = new UserModel()
             {
@@ -43,7 +43,7 @@ namespace MongoModels.Models
             return user;
         }
 
-        public UserModel getUser(string username, string password)
+        public static UserModel getUser(string username, string password)
         {
             var cursor = (
                 from e in collection.AsQueryable<UserModel>()
