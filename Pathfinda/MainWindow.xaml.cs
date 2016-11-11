@@ -86,7 +86,7 @@ namespace Pathfinda
         private void LoginWindow_NewUserAttempt(string username, string password)
         {
             var u = user.newUser(username, password);
-            Character = CharacterClass.Create();
+            _character = CharacterClass.Create();
             Character.Owner = u._id;
             Characters = new List<Character>() { Character };
         }
@@ -99,8 +99,13 @@ namespace Pathfinda
                 Characters = CharacterClass.getUserCharacters(u);
                 if(Characters == null)
                 {
-                    Character = CharacterClass.Create();
+                    _character = CharacterClass.Create();
+                    Character.Owner = u._id;
                     Characters = new List<Character> { Character };
+                }
+                else
+                {
+                    _character = Characters[0];
                 }
             } else
             {
@@ -113,9 +118,9 @@ namespace Pathfinda
             System.Diagnostics.Process.Start("http://paizo.com/pathfinderRPG/prd/ultimateCampaign/campaignSystems/alignment.html");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            //Character.Put();
+            await CharacterClass.Put(Character);
         }
     }
 }

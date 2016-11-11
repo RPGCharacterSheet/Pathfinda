@@ -36,10 +36,10 @@
         </Grid.RowDefinitions>
         <Expander Grid.Row="0" x:Name="CharacterDescriptionExpander" IsExpanded="True" Header="Character Description">
             <WrapPanel FlowDirection="LeftToRight">
-                <Button Content="Load from Mongo" Click="Button_Click" Margin="5" />
+                <Button Content="Save Character" Click="Button_Click" Margin="5" />
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Character Name" Style="{StaticResource LabelStyle}"/>
-                    <TextBox x:Name="CharacterName" Text="Felicia" Style="{StaticResource InputStyle}" />
+                    <TextBox x:Name="CharacterName" Text="{Binding Character.Name}" Style="{StaticResource InputStyle}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Alignment" Style="{StaticResource LabelStyle}" PreviewMouseDown="TextBlock_PreviewMouseDown" />
@@ -48,11 +48,11 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Class" Style="{StaticResource LabelStyle}"  />
-                    <TextBox x:Name="Class" Text="Sorcerer" Style="{StaticResource InputStyle}" />
+                    <TextBox x:Name="Class" Text="" Style="{StaticResource InputStyle}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Deity" Style="{StaticResource LabelStyle}" />
-                    <TextBox x:Name="Deity" Text="None" Style="{StaticResource InputStyle}" />
+                    <TextBox x:Name="Deity" Text="{Binding Charater.Deity}" Style="{StaticResource InputStyle}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gold" Style="{StaticResource LabelStyle}" />
@@ -68,7 +68,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Homeland" Style="{StaticResource LabelStyle}" />
-                    <TextBox x:Name="Homeland" Style="{StaticResource InputStyle}" />
+                    <TextBox x:Name="Homeland" Text="{Binding Character.Homeland}" Style="{StaticResource InputStyle}" />
                 </StackPanel>
             </WrapPanel>
         </Expander>
