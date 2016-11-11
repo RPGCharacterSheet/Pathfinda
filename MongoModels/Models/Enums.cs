@@ -49,6 +49,44 @@ namespace MongoModels.Models
         ReflexBonus,
         WillBonus,
         CombatManeuverDefense,
+        MaxHP,
+        // class skills
+        Acrobatics = 100,
+        Appraise,
+        Bluff,
+        Climb,
+        Craft,
+        Diplomacy,
+        DisableDevice,
+        Disguise,
+        EscapeArtist,
+        Fly,
+        HandleAnimal,
+        Heal,
+        Intimidate,
+        KnowledgeArcana,
+        KnowledgeDungeoneering,
+        KnowledgeEngineering,
+        KnowledgeGeography,
+        KnowledgeHistory,
+        KnowledgeLocal,
+        KnowledgeNature,
+        KnowledgeNobility,
+        KnowledgePlanes,
+        KnowledgeReligion,
+        Linguistics,
+        Perception,
+        Perform,
+        Profession,
+        Ride,
+        SenseMotive,
+        SleightOfHand,
+        Spellcraft,
+        Stealth,
+        Survival,
+        Swim,
+        UseMagicDevice,
+        // end class skills
     }
 
     /// <summary>
@@ -65,6 +103,21 @@ namespace MongoModels.Models
         Medium, // Dexterity bonus is limited to 3. Check Penalty to all Str and Dex based skills: -3. Speed 30->20  20->15. Run x4
         Heavy, // Dexterity bonus is limited to 1. Chec Penalty to all Str and Dex based skills: -6 Speed 30->20  20->15.  Run x3
         Overloaded // No Dex bonus to AC. Movement is limited to 5 ft / round.
+    }
+
+    /// <summary>
+    /// Growth rates for Fort, Reflex, and Will as a character levels up
+    /// </summary>
+    public enum SaveGrowth
+    {
+        /// <summary>
+        /// This stat will grow by floor(2 + level/2)
+        /// </summary>
+        Good,
+        /// <summary>
+        /// This stat will grow by floor(level/3)
+        /// </summary>
+        Poor
     }
 
 }

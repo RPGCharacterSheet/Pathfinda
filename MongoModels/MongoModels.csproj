@@ -57,6 +57,7 @@
     <Compile Include="Models\Character.cs" />
     <Compile Include="Models\CharacterModifier.cs" />
     <Compile Include="Models\CharacterClass.cs" />
+    <Compile Include="Models\Class.cs" />
     <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\Feat.cs" />
     <Compile Include="Models\User.cs" />

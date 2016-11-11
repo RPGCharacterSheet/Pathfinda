@@ -13,6 +13,7 @@ namespace MongoModels.Models
         public string Name { get; set; }
         public string CreatorName { get; set; }
         public Races Race { get; set; }
+        public List<Class> Classes { get; set; }
         public Dictionary<string, AbilityScore> AbilityScores { get; set; }
         public List<InventoryItem> Inventory { get; set; }
         public List<CharacterModifier> CharacterModifiers { get; set; }

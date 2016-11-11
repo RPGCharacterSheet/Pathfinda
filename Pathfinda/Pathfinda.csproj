@@ -73,9 +73,6 @@
     <Compile Include="Converters\StringToVisibilityConverter.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Formulas.cs" />
-    <Compile Include="ImportedData\Classes.cs" />
-    <Compile Include="ImportedData\Feats.cs" />
-    <Compile Include="ImportedData\Spells.cs" />
     <Compile Include="Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
