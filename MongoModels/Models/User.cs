@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization.Attributes;
 using System.Security.Cryptography;
 using MongoDB.Driver;
-using MongoDB.Bson;
 using MongoDB.Driver.Linq;
 namespace MongoModels.Models
 {
@@ -30,6 +28,11 @@ namespace MongoModels.Models
             buffer.AddRange(salt);
             byte[] computedHash = hashAlgorithm.ComputeHash(buffer.ToArray());
             return System.Text.Encoding.UTF8.GetString(computedHash);
+        }
+
+        public static List<UserModel> findUserWithLikeName(string name)
+        {
+            return (from e in collection.AsQueryable() where e.UserName.Contains(name) select e).ToList();
         }
 
         public static UserModel newUser(string username, string password)
