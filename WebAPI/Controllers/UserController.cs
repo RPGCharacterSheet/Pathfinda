@@ -10,22 +10,25 @@ namespace WebAPI.Controllers
     public class UserController : Controller
     {
         // GET: User
-        public ActionResult Index(string userName, string password)
+        [HttpPost]
+        public string Index(string userName, string password)
         {
+            Response.ContentType = "application/json";
             User.UserModel user = MongoModels.Models.User.getUser(userName, password);
             if(user == null)
             {
-                return new HttpNotFoundResult();
+                return @"{""error"": ""authentication failed""}";
             }
-            return Json(user);
+            
+            return user.ToJson();
         }
 
         // GET: User/Create
-        [HttpGet]
-        [HttpPost]
-        public ActionResult Create(string username, string password, string email="")
+        [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post)]
+        public string Create(string username, string password, string email="")
         {
-            return Json(MongoModels.Models.User.newUser(username, password));
+            Response.ContentType = "application/json";
+            return MongoModels.Models.User.newUser(username, password).ToJson();
         }
         
         // GET: User/Delete/5
