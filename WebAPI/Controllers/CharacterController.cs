@@ -33,15 +33,20 @@ namespace WebAPI.Controllers
             if (character == null)
             {
                 character = CharacterClass.Create();
-                character.Owner = new ObjectId(user);
             }
-            if(character._id == null)
+            if(character._id.Pid == 0)
             {
 
                 character._id = CharacterClass.Create()._id;
 
             }
-            return CharacterClass.PutSync(character, MongoModels.Models.User.GetById(new ObjectId(user))).ToJson();
+            if(character.Owner.Pid == 0)
+            {
+
+                character.Owner = new ObjectId(user);
+            }
+            CharacterClass.PutSync(character, MongoModels.Models.User.GetById(new ObjectId(user)));
+            return character.ToJson();
         }
 
         // GET||Post: Character/Edit
@@ -49,7 +54,8 @@ namespace WebAPI.Controllers
         public string Edit(Character character, User.UserModel user)
         {
             Response.ContentType = "application/json";
-            return CharacterClass.PutSync(character, user).ToJson();
+            CharacterClass.PutSync(character, user);
+            return character.ToJson();
         }
 
         // GET: Character/Delete/5
