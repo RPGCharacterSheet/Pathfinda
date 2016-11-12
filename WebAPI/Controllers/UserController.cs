@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using MongoModels.Models;
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 namespace WebAPI.Controllers
 {
     public class UserController : Controller
@@ -31,6 +32,15 @@ namespace WebAPI.Controllers
             return MongoModels.Models.User.newUser(username, password).ToJson();
         }
         
+        public string Lookup(string name)
+        {
+            Response.ContentType = "application/json";
+            return MongoModels.Models.User
+                .findUserWithLikeName(name)
+                .Select(e => new { UserName = e.UserName, _id = e._id })
+                .ToJson(writerSettings: new JsonWriterSettings { OutputMode = JsonOutputMode.Strict });
+        }
+
         // GET: User/Delete/5
         //public ActionResult Delete(string id)
         //{

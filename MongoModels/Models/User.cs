@@ -30,9 +30,9 @@ namespace MongoModels.Models
             return System.Text.Encoding.UTF8.GetString(computedHash);
         }
 
-        public static List<string> findUserWithLikeName(string name)
+        public static List<UserModel> findUserWithLikeName(string name)
         {
-            return (from e in collection.AsQueryable() where e.UserName.Contains(name) select e.UserName).ToList();
+            return (from e in collection.AsQueryable() where e.UserName.Contains(name) select e).ToList();
         }
 
         public static UserModel newUser(string username, string password)

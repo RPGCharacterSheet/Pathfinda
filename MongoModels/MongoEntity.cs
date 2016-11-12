@@ -14,9 +14,7 @@ namespace MongoModels
 
         public string ToJson()
         {
-
-            Regex rgx = new Regex(@"ObjectId\(([^)]*)\)");
-            return rgx.Replace((this.ToBsonDocument()).ToJson(), "$1");
+            return (this.ToBsonDocument()).ToJson(writerSettings: new MongoDB.Bson.IO.JsonWriterSettings { OutputMode = MongoDB.Bson.IO.JsonOutputMode.Strict });
         }
 
         public MongoEntityBase()
