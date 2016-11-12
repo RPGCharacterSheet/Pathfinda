@@ -23,17 +23,23 @@ namespace WebAPI.Controllers
 
         // POST: Character/Create
         [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post)]
-        public object Create(string user, Character character=null)
+        public string Create(string user, Character character=null)
         {
             Response.ContentType = "application/json";
             if (user == null)
             {
-                return @"{""error"":""user must be defined""} ";
+                return new { error = "user must be defined" }.ToJson();
             }
             if (character == null)
             {
                 character = CharacterClass.Create();
                 character.Owner = new ObjectId(user);
+            }
+            if(character._id == null)
+            {
+
+                character._id = CharacterClass.Create()._id;
+
             }
             return CharacterClass.PutSync(character, MongoModels.Models.User.GetById(new ObjectId(user))).ToJson();
         }

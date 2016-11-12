@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
             User.UserModel user = MongoModels.Models.User.getUser(userName, password);
             if(user == null)
             {
-                return @"{""error"": ""authentication failed""}";
+                return new { error = "authentication failed" }.ToJson(); ;
             }
             
             return user.ToJson();
