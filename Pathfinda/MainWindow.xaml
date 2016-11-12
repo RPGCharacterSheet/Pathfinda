@@ -64,7 +64,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Class" Style="{StaticResource LabelStyle}"  />
-                        <TextBox x:Name="Class" Text="" Style="{StaticResource InputStyle}" />
+                        <TextBox x:Name="Class" Text="{Binding Character.Class}" Style="{StaticResource InputStyle}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Deity" Style="{StaticResource LabelStyle}" />
