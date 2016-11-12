@@ -10,6 +10,7 @@ namespace MongoModels.Models
     {
 
         public ObjectId Owner { get; set; }
+        public List<ObjectId> Shared { get; set; }
         public string Name { get; set; }
         public string CreatorName { get; set; }
         public Races Race { get; set; }
