@@ -113,5 +113,92 @@ namespace Pathfinda
                     return 0;
             }
         }
+
+        public static int Speed(this Races r)
+        {
+            switch (r)
+            {
+                case Races.Dwarf:
+                case Races.Gnome:
+                case Races.Halfling:
+                case Races.Oread:
+                case Races.Ratfolk:
+                    return 20;
+                default:
+                case Races.Elf:
+                case Races.HalfElf:
+                case Races.HalfOrc:
+                case Races.Human:
+                case Races.Aasimar:
+                case Races.Catfolk:
+                case Races.Dhampir:
+                case Races.Drow:
+                case Races.Fetchling:
+                case Races.Goblin:
+                case Races.Hobgoblin:
+                case Races.Ifrit:
+                case Races.Kobold:
+                case Races.Orc:
+                case Races.Sylph:
+                case Races.Tengu:
+                case Races.Tiefling:
+                case Races.Undine:
+                    return 30;
+            }
+        }
+
+        public static List<ItemProperties> SkillBonuses(this Races r)
+        {
+            switch (r)
+            {
+                case Races.Dwarf:
+                    return new List<ItemProperties>() { ItemProperties.Appraise, ItemProperties.Perception };
+                case Races.Elf:
+                    return new List<ItemProperties>() { ItemProperties.Perception };
+                case Races.Gnome: // gnome also gets to choose from Craft or Profession. The user will have to add a Character modifier manually
+                    return new List<ItemProperties>() { ItemProperties.Perception };
+                case Races.HalfElf:
+                    return new List<ItemProperties>() { ItemProperties.Perception };
+                case Races.HalfOrc:
+                    return new List<ItemProperties>() { ItemProperties.Intimidate };
+                case Races.Halfling:
+                    return new List<ItemProperties>() { ItemProperties.Perception, ItemProperties.Acrobatics, ItemProperties.Climb };
+                default:
+                case Races.Human:
+                    return new List<ItemProperties>();
+                case Races.Aasimar:
+                    return new List<ItemProperties>() { ItemProperties.Diplomacy, ItemProperties.Perception };
+                case Races.Catfolk:
+                    return new List<ItemProperties>() { ItemProperties.Perception, ItemProperties.Stealth, ItemProperties.Survival };
+                case Races.Dhampir:
+                    return new List<ItemProperties>() { ItemProperties.Bluff, ItemProperties.Perception };
+                case Races.Drow:
+                    return new List<ItemProperties>() { ItemProperties.Perception };
+                case Races.Fetchling:
+                    return new List<ItemProperties>() { ItemProperties.KnowledgePlanes, ItemProperties.Stealth };
+                case Races.Goblin:
+                    return new List<ItemProperties>() { ItemProperties.Ride, ItemProperties.Stealth };
+                case Races.Hobgoblin:
+                    return new List<ItemProperties>() { ItemProperties.Stealth };
+                case Races.Ifrit:
+                    return new List<ItemProperties>();
+                case Races.Kobold: // specifically Craft (trapmaking) and Profession (miner)
+                    return new List<ItemProperties>() { ItemProperties.Craft, ItemProperties.Perception, ItemProperties.Profession };
+                case Races.Orc:
+                    return new List<ItemProperties>();
+                case Races.Oread:
+                    return new List<ItemProperties>();
+                case Races.Ratfolk: // specifically Craft(alchemy) and the Handle Animal bonus is +4
+                    return new List<ItemProperties>() { ItemProperties.Craft, ItemProperties.HandleAnimal, ItemProperties.Perception, ItemProperties.UseMagicDevice };
+                case Races.Sylph:
+                    return new List<ItemProperties>();
+                case Races.Tengu: // Linguistics +4
+                    return new List<ItemProperties>() { ItemProperties.Linguistics, ItemProperties.Perception, ItemProperties.Stealth };
+                case Races.Tiefling:
+                    return new List<ItemProperties>() { ItemProperties.Bluff, ItemProperties.Stealth };
+                case Races.Undine:
+                    return new List<ItemProperties>();
+            }
+        }
     }
 }

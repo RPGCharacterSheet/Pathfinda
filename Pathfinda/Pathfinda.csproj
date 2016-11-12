@@ -76,6 +76,7 @@
     <Compile Include="Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
+    <Compile Include="StatDetails.cs" />
     <Compile Include="ViewModels\CharacterVM.cs" />
     <Page Include="Login.xaml">
       <SubType>Designer</SubType>

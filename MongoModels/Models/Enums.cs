@@ -42,14 +42,16 @@ namespace MongoModels.Models
         Deflection,
         Dodge,
         MaxDexBonus,
-        ArmorCheckPenalty,
-        ExtraSpeedPenalty, // beyond the normal penalty for Medium or Heavy armor
+        ArmorCheck,
+        Speed,
         ReachInFeet,
         FortitudeBonus,
         ReflexBonus,
         WillBonus,
         CombatManeuverDefense,
         MaxHP,
+        BaseAttackBonus,
+        Initiative,
         // class skills
         Acrobatics = 100,
         Appraise,
