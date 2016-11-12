@@ -10,6 +10,11 @@ namespace MongoModels
     public abstract class MongoEntityBase
     {
         public ObjectId _id { get; set; }
+
+        public MongoEntityBase()
+        {
+
+        }
     }
     public abstract class MongoEntityBase<T> : MongoEntityBase where T : MongoEntityBase
     {

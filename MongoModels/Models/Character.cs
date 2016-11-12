@@ -38,7 +38,12 @@ namespace MongoModels.Models
         public string Immunities { get; set; }
         public string Notes { get; set; }
 
-        protected Character() : base()
+        public Character() : base()
+        {
+            
+        }
+
+        private void CreateDummyCharacter()
         {
             Inventory = new List<InventoryItem>();
             AbilityScores = new Dictionary<string, AbilityScore>()
