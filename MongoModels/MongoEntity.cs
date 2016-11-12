@@ -5,17 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 namespace MongoModels
 {
     public abstract class MongoEntityBase
     {
         public ObjectId _id { get; set; }
 
+        public string ToJson()
+        {
+
+            Regex rgx = new Regex(@"ObjectId\(([^)]*)\)");
+            return rgx.Replace((this.ToBsonDocument()).ToJson(), "$1");
+        }
+
         public MongoEntityBase()
         {
 
         }
     }
+
     public abstract class MongoEntityBase<T> : MongoEntityBase where T : MongoEntityBase
     {
 
