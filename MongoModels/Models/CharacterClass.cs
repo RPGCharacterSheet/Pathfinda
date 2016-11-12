@@ -25,6 +25,21 @@ namespace MongoModels.Models
                     select character)
                     .ToList();
         }
+        //Overload the Put to require a user
+        public static Character PutSync(Character character, User.UserModel user)
+        {
+            if(user._id == character.Owner)
+            {
+                return collection.FindOneAndReplace<Character>(
+                    c => c._id == character._id, 
+                    character, 
+                    new FindOneAndReplaceOptions<Character, Character> { IsUpsert = true });
+            }
+            else
+            {
+                return null; //Maybe throw error eventually?
+            }
+        }
 
         protected CharacterClass() : base()
         {
