@@ -4,11 +4,125 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoModels.Models;
+using System.ComponentModel;
+using MongoModels;
 
 namespace Pathfinda.ViewModels
 {
-    public class CharacterVM : Character
+    public class CharacterVM : Character, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged Helpers
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void Notify(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        private void NotifyNonCalulatedStats()
+        {
+            Notify("Name");
+            Notify("CreatorName");
+            Notify("Race");
+            Notify("Classes");
+            Notify("AbilityScores");
+            Notify("Inventory");
+            Notify("CharacterModifiers");
+            Notify("SpellsKnown");
+            Notify("Size");
+            Notify("MaxHP");
+            Notify("CurrentHP");
+            Notify("Gold");
+            Notify("XPCurrent");
+            Notify("XPNext");
+            Notify("Languages");
+            Notify("Alignment");
+            Notify("Deity");
+            Notify("Homeland");
+            Notify("Age");
+            Notify("Gender");
+            Notify("Height");
+            Notify("Weight");
+            Notify("DamageReduction");
+            Notify("Resistances");
+            Notify("Immunities");
+            Notify("Notes");
+        }
+        private void NotifySkills()
+        {
+            Notify("Acrobatics");
+            Notify("Appraise");
+            Notify("Bluff");
+            Notify("Climb");
+            Notify("Craft");
+            Notify("Diplomacy");
+            Notify("DisableDevice");
+            Notify("Disguise");
+            Notify("EscapeArtist");
+            Notify("Fly");
+            Notify("HandleAnimal");
+            Notify("Heal");
+            Notify("Intimidate");
+            Notify("KnowledgeArcana");
+            Notify("KnowledgeDungeoneering");
+            Notify("KnowledgeEngineering");
+            Notify("KnowledgeGeography");
+            Notify("KnowledgeHistory");
+            Notify("KnowledgeLocal");
+            Notify("KnowledgeNature");
+            Notify("KnowledgeNobility");
+            Notify("KnowledgePlanes");
+            Notify("KnowledgeReligion");
+            Notify("Linguistics");
+            Notify("Perception");
+            Notify("Perform");
+            Notify("Profession");
+            Notify("Ride");
+            Notify("SenseMotive");
+            Notify("SleightOfHand");
+            Notify("Spellcraft");
+            Notify("Stealth");
+            Notify("Survival");
+            Notify("Swim");
+            Notify("UseMagicDevice");
+        }
+        private void NotifyEverything()
+        {
+            NotifyNonCalulatedStats();
+            NotifySkills();
+            Notify("ClassString");
+            Notify("GearWeight");
+            Notify("Encumbrance");
+            Notify("ArmorClass");
+            Notify("TouchAC");
+            Notify("FlatFootedAC");
+            Notify("SpellResistance");
+            Notify("FortitudeSave");
+            Notify("ReflexSave");
+            Notify("WillSave");
+            Notify("CombatManeuverDefense");
+            Notify("BaseAttackBonus");
+            Notify("BABFormatted");
+            Notify("Initiative");
+            Notify("Speed");
+        }
+        #endregion
+
+        public override string Name {get;set;}
+        public override Races Race
+        {
+            get
+            {
+                return base.Race;
+            }
+
+            set
+            {
+                base.Race = value;
+                NotifyEverything();
+            }
+        }
+
+        public string ClassString { get { return string.Join(" ", Classes?.Select(x => $"{x.Name} ({x.Level})")); } }
+
         public double GearWeight
         {
             get { return Inventory?.Sum(x => x.WeightCounts ? x.Weight : 0) ?? 0; }
@@ -180,7 +294,8 @@ namespace Pathfinda.ViewModels
         }
 
         /// <summary>
-        /// BAB is a single number, but it is often represented as +4 or +8/+3 or +14/+10/+6 because you get 3 attacks and use a different BAB per attack
+        /// BAB is a single number, but it is often represented as +4 or +7/+2 or +14/+9/+4 because you get 3 attacks and use a different BAB per attack. 
+        /// BABFormatted will get you the nicely formatted string
         /// </summary>
         public StatDetails BaseAttackBonus
         {
@@ -193,6 +308,21 @@ namespace Pathfinda.ViewModels
                 }
                 bab += StatsProvidedByInventory(ItemProperties.BaseAttackBonus);
                 bab += StatsProvidedByCharacter(ItemProperties.BaseAttackBonus);
+                return bab;
+            }
+        }
+
+        public string BABFormatted
+        {
+            get
+            {
+                int b = (int)BaseAttackBonus.Total;
+                string bab = "+" + b.ToString();
+                while (b > 5)
+                {
+                    b -= 5;
+                    bab += "/+" + b.ToString();
+                }
                 return bab;
             }
         }

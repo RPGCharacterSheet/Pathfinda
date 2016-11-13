@@ -16,7 +16,6 @@
             <converters:ModifierConverter x:Key="Modifier"/>
             <converters:ModifierColorConverter x:Key="ModifierColor" />
             <converters:StringToVisibiltyConverter x:Key="StringToVisibility" />
-            <converters:BABConverter x:Key="BABConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -25,7 +24,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-        <ListBox Height="50" ItemsSource="{Binding ElementName=_this,  Path=Characters}" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Left">
+        <ListBox Height="50" ItemsSource="{Binding Characters}" SelectedItem="{Binding Path=Character, Mode=TwoWay}" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalAlignment="Left">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" />
@@ -55,16 +54,21 @@
                     <Button Content="Save Character" Click="Button_Click" Margin="5" />
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Character Name" Style="{StaticResource LabelStyle}"/>
-                        <TextBox x:Name="CharacterName" Text="{Binding ElementName=_this, Path=Character.Name}" Style="{StaticResource InputStyle}" />
+                        <TextBox x:Name="CharacterName" Text="{Binding Character.Name}" Style="{StaticResource InputStyle}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Race" Style="{StaticResource LabelStyle}" PreviewMouseDown="TextBlock_PreviewMouseDown" />
+                        <ComboBox x:Name="Race" Width="200" ItemsSource="{Binding Races}" SelectedItem="{Binding Character.Race}" >
+                        </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Alignment" Style="{StaticResource LabelStyle}" PreviewMouseDown="TextBlock_PreviewMouseDown" />
-                        <ComboBox x:Name="Alignment" Width="200" ItemsSource="{Binding Alignments}" >
+                        <ComboBox x:Name="Alignment" Width="200" ItemsSource="{Binding Alignments}" SelectedItem="{Binding Character.Alignment}" >
                         </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Class" Style="{StaticResource LabelStyle}"  />
-                        <TextBox x:Name="Class" Text="{Binding Character.Class}" Style="{StaticResource InputStyle}" />
+                        <TextBox x:Name="Class" Text="{Binding Character.ClassString, Mode=OneWay}" Style="{StaticResource InputStyle}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Deity" Style="{StaticResource LabelStyle}" />
@@ -113,21 +117,21 @@
                     <Border BorderBrush="#FFFF0000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
                         <StackPanel Orientation="Vertical">
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal"  ToolTip="{Binding Character.Initiative.Description}" >
                                     <TextBlock Text="Init" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.Initiative, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Path=Character.Initiative.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False"/>
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="BAB" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.BaseAttackBonus, Converter={StaticResource BABConverter}, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.BaseAttackBonus.Description}">
+                                    <TextBlock Text="BAB" Style="{StaticResource LabelStyle}"/>
+                                    <TextBox Text="{Binding Path=Character.BABFormatted, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Speed" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.Speed, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.Speed.Description}">
+                                    <TextBlock Text="Speed" Style="{StaticResource LabelStyle}"/>
+                                    <TextBox Text="{Binding Path=Character.Speed.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -135,27 +139,27 @@
                     <Border BorderBrush="#FF0000FF" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
                         <StackPanel Orientation="Vertical">
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.ArmorClass.Description}">
                                     <TextBlock Text="AC" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.ArmorClass, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.ArmorClass.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.TouchAC.Description}">
                                     <TextBlock Text="Touch AC" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.TouchAC, Converter={StaticResource BABConverter}, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.TouchAC.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.FlatFootedAC.Description}">
                                     <TextBlock Text="Flat Footed" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.FlatFootedAC, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.FlatFootedAC.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.CombatManeuverDefense.Description}">
                                     <TextBlock Text="CMD" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.CombatManeuverDefense, Converter={StaticResource BABConverter}, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.CombatManeuverDefense.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -163,27 +167,27 @@
                     <Border BorderBrush="#FF00FF00" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
                         <StackPanel Orientation="Vertical">
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.SpellResistance.Description}">
                                     <TextBlock Text="Spell Resist" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.SpellResistance, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.SpellResistance.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.FortitudeSave.Description}">
                                     <TextBlock Text="Fort Save" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.FortitudeSave, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.FortitudeSave.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.ReflexSave.Description}">
                                     <TextBlock Text="Reflex Save" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.ReflexSave, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Character.ReflexSave.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                             <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.WillSave.Description}">
                                     <TextBlock Text="Will Save" Style="{StaticResource LabelStyle}" />
-                                    <TextBox Text="{Binding Path=Character.WillSave, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                                    <TextBox Text="{Binding Path=Character.WillSave.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -191,6 +195,12 @@
                 </StackPanel>
             </Expander>
             <Expander Grid.Row="2" x:Name="SkillsExpander" IsExpanded="True" Header="Skills">
+                <Border BorderBrush="#FF000000" BorderThickness="1,1,1,1" CornerRadius="10" Margin="4">
+                    <StackPanel Orientation="Horizontal" ToolTip="{Binding Character.Acrobatics.Description}">
+                        <TextBlock Text="Acrobatics" Style="{StaticResource LabelStyle}" />
+                        <TextBox Text="{Binding Character.Acrobatics.Total, Mode=OneWay}" Style="{StaticResource InputStyle}" IsEnabled="False" />
+                    </StackPanel>
+                </Border>
 
             </Expander>
 
