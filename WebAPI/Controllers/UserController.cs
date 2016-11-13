@@ -14,13 +14,16 @@ namespace WebAPI.Controllers
         [HttpPost]
         public string Index(string userName, string password)
         {
+            if (String.IsNullOrEmpty(userName) || String.IsNullOrEmpty(password)) return new { _t = "Error", error = "userName or password was not defined" }.ToJson();
             Response.ContentType = "application/json";
             User.UserModel user = MongoModels.Models.User.getUser(userName, password);
             if(user == null)
             {
                 return new { error = "authentication failed" }.ToJson(); ;
             }
-            
+            user.Password = "";
+            user.Email = user.Email ?? "";
+
             return user.ToJson();
         }
 
@@ -29,7 +32,10 @@ namespace WebAPI.Controllers
         public string Create(string username, string password, string email="")
         {
             Response.ContentType = "application/json";
-            return MongoModels.Models.User.newUser(username, password).ToJson();
+            var user = MongoModels.Models.User.newUser(username, password);
+            user.Password = "";
+            user.Email = user.Email ?? "";
+            return user.ToJson();
         }
         
         public string Lookup(string name)
