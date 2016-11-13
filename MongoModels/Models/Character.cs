@@ -8,23 +8,22 @@ namespace MongoModels.Models
 {    
     public class Character : MongoEntityBase
     {
-
         public ObjectId Owner { get; set; }
         public List<ObjectId> Shared { get; set; }
-        public string Name { get; set; }
-        public string CreatorName { get; set; }
-        public Races Race { get; set; }
-        public List<Class> Classes { get; set; }
-        public Dictionary<string, AbilityScore> AbilityScores { get; set; }
-        public List<InventoryItem> Inventory { get; set; }
-        public List<CharacterModifier> CharacterModifiers { get; set; }
-        public List<Spell> SpellsKnown { get; set; }
-        public Sizes Size { get; set; }
-        public int MaxHP { get; set; }
-        public int CurrentHP { get; set; }
-        public double Gold { get; set; }
-        public int XPCurrent { get; set; }
-        public int XPNext { get; set; }
+        public virtual string Name { get; set; }
+        public virtual string CreatorName { get; set; }
+        public virtual Races Race { get; set; }
+        public virtual List<Class> Classes { get; set; }
+        public virtual Dictionary<string, AbilityScore> AbilityScores { get; set; }
+        public virtual List<InventoryItem> Inventory { get; set; }
+        public virtual List<CharacterModifier> CharacterModifiers { get; set; }
+        public virtual List<Spell> SpellsKnown { get; set; }
+        public virtual Sizes Size { get; set; }
+        public virtual int MaxHP { get; set; }
+        public virtual int CurrentHP { get; set; }
+        public virtual double Gold { get; set; }
+        public virtual int XPCurrent { get; set; }
+        public virtual int XPNext { get; set; }
         public string Languages { get; set; }
         public Alignments Alignment { get; set; }
         public string Deity { get; set; }
@@ -40,26 +39,20 @@ namespace MongoModels.Models
 
         public Character() : base()
         {
-            
-        }
-
-        private void CreateDummyCharacter()
-        {
+            Classes = new List<Class>();
+            AbilityScores = new Dictionary<string, AbilityScore>();
             Inventory = new List<InventoryItem>();
+            CharacterModifiers = new List<CharacterModifier>();
+            SpellsKnown = new List<Spell>();
             AbilityScores = new Dictionary<string, AbilityScore>()
             {
-                {Abilities.Strength.ToString(), new AbilityScore(Abilities.Strength, 8) },
+                {Abilities.Strength.ToString(), new AbilityScore(Abilities.Strength, 10) },
                 {Abilities.Constitution.ToString(), new AbilityScore(Abilities.Constitution, 10) },
                 {Abilities.Dexterity.ToString(),  new AbilityScore(Abilities.Dexterity, 10) },
                 {Abilities.Wisdom.ToString(),  new AbilityScore(Abilities.Wisdom, 10) },
                 {Abilities.Intelligence.ToString(), new AbilityScore(Abilities.Intelligence, 10) },
                 {Abilities.Charisma.ToString(), new AbilityScore(Abilities.Charisma, 10) },
             };
-            CharacterModifiers = new List<CharacterModifier>();
-            Race = Races.Human;
-            Size = Sizes.Medium;
-            MaxHP = 10;
-            CurrentHP = 10;
         }
     }
 }

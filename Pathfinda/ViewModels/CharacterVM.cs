@@ -4,11 +4,125 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoModels.Models;
+using System.ComponentModel;
+using MongoModels;
 
 namespace Pathfinda.ViewModels
 {
-    public class CharacterVM : Character
+    public class CharacterVM : Character, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged Helpers
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void Notify(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        private void NotifyNonCalulatedStats()
+        {
+            Notify("Name");
+            Notify("CreatorName");
+            Notify("Race");
+            Notify("Classes");
+            Notify("AbilityScores");
+            Notify("Inventory");
+            Notify("CharacterModifiers");
+            Notify("SpellsKnown");
+            Notify("Size");
+            Notify("MaxHP");
+            Notify("CurrentHP");
+            Notify("Gold");
+            Notify("XPCurrent");
+            Notify("XPNext");
+            Notify("Languages");
+            Notify("Alignment");
+            Notify("Deity");
+            Notify("Homeland");
+            Notify("Age");
+            Notify("Gender");
+            Notify("Height");
+            Notify("Weight");
+            Notify("DamageReduction");
+            Notify("Resistances");
+            Notify("Immunities");
+            Notify("Notes");
+        }
+        private void NotifySkills()
+        {
+            Notify("Acrobatics");
+            Notify("Appraise");
+            Notify("Bluff");
+            Notify("Climb");
+            Notify("Craft");
+            Notify("Diplomacy");
+            Notify("DisableDevice");
+            Notify("Disguise");
+            Notify("EscapeArtist");
+            Notify("Fly");
+            Notify("HandleAnimal");
+            Notify("Heal");
+            Notify("Intimidate");
+            Notify("KnowledgeArcana");
+            Notify("KnowledgeDungeoneering");
+            Notify("KnowledgeEngineering");
+            Notify("KnowledgeGeography");
+            Notify("KnowledgeHistory");
+            Notify("KnowledgeLocal");
+            Notify("KnowledgeNature");
+            Notify("KnowledgeNobility");
+            Notify("KnowledgePlanes");
+            Notify("KnowledgeReligion");
+            Notify("Linguistics");
+            Notify("Perception");
+            Notify("Perform");
+            Notify("Profession");
+            Notify("Ride");
+            Notify("SenseMotive");
+            Notify("SleightOfHand");
+            Notify("Spellcraft");
+            Notify("Stealth");
+            Notify("Survival");
+            Notify("Swim");
+            Notify("UseMagicDevice");
+        }
+        private void NotifyEverything()
+        {
+            NotifyNonCalulatedStats();
+            NotifySkills();
+            Notify("ClassString");
+            Notify("GearWeight");
+            Notify("Encumbrance");
+            Notify("ArmorClass");
+            Notify("TouchAC");
+            Notify("FlatFootedAC");
+            Notify("SpellResistance");
+            Notify("FortitudeSave");
+            Notify("ReflexSave");
+            Notify("WillSave");
+            Notify("CombatManeuverDefense");
+            Notify("BaseAttackBonus");
+            Notify("BABFormatted");
+            Notify("Initiative");
+            Notify("Speed");
+        }
+        #endregion
+
+        public override string Name {get;set;}
+        public override Races Race
+        {
+            get
+            {
+                return base.Race;
+            }
+
+            set
+            {
+                base.Race = value;
+                NotifyEverything();
+            }
+        }
+
+        public string ClassString { get { return string.Join(" ", Classes?.Select(x => $"{x.Name} ({x.Level})")); } }
+
         public double GearWeight
         {
             get { return Inventory?.Sum(x => x.WeightCounts ? x.Weight : 0) ?? 0; }
@@ -39,66 +153,49 @@ namespace Pathfinda.ViewModels
             return item.Properties.ContainsKey(property.ToString()) ? item.Properties[property.ToString()] : @default;
         }
 
-        // Aggregate modifiers for relevant items in inventory.
-        private int SumInventoryModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed, bool mustBeEquipped = true)
+        private StatDetails StatsProvidedByInventory(ItemProperties modifier, bool mustBeEquipped = true)
         {
-            int result = 0;
-            descriptionOfWhatGotSummed = "";
+            return StatsProvidedByInventory(new List<ItemProperties>() { modifier }, mustBeEquipped);
+        }
+
+        // Aggregate modifiers for relevant items in inventory.
+        private StatDetails StatsProvidedByInventory(List<ItemProperties> modifiers, bool mustBeEquipped = true)
+        {
+            StatDetails details = new StatDetails();
             foreach (var item in Inventory.Where(x => x.Properties.Count > 0 && (!mustBeEquipped || x.IsEquipped)))
             {
                 int sumOfRelevantProperties = item.Properties.Sum(x => modifiers.Select(y => y.ToString()).Contains(x.Key) ? x.Value : 0);
                 if (sumOfRelevantProperties != 0)
-                {
-                    descriptionOfWhatGotSummed += $"+{sumOfRelevantProperties} from {item.Name}";
-                    result += sumOfRelevantProperties;
-                }
+                    details.AddContributingFactor(item.Name, sumOfRelevantProperties);
             }
-            return result;
+            return details;
         }
 
-        private int SumMiscModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed)
+        private StatDetails StatsProvidedByCharacter(ItemProperties modifier)
         {
-            int result = 0;
-            descriptionOfWhatGotSummed = "";
+            return StatsProvidedByCharacter(new List<ItemProperties>() { modifier });
+        }
+
+        private StatDetails StatsProvidedByCharacter(List<ItemProperties> modifiers)
+        {
+            StatDetails details = new StatDetails();
             foreach (var effect in CharacterModifiers.Where(x => modifiers.Contains(x.PropertyModified)))
-            {
-                descriptionOfWhatGotSummed += $"+{effect.Value} from {effect.ModificationReason}";
-                result += effect.Value;
-            }
-            return result;
+                details.AddContributingFactor(effect.ModificationReason, effect.Value);
+            return details;
         }
 
-        private int SumInventoryAndMiscModifiers(List<ItemProperties> modifiers, out string descriptionOfWhatGotSummed)
+        private StatDetails ArmorCalculator(List<ItemProperties> modifiers)
         {
-            string miscDescription = "";
-            var miscTotal = SumMiscModifiers(modifiers, out miscDescription);
-            string armorDescription = "";
-            var itemTotal = SumInventoryModifiers(modifiers, out armorDescription);
-            descriptionOfWhatGotSummed = $"{armorDescription} {miscDescription}";
-            return itemTotal + miscTotal;
+            StatDetails armor = new StatDetails();
+            armor.AddContributingFactor("base", 10);
+            armor.AddContributingFactor("Dex", DexModifierForAC);
+            armor.AddContributingFactor("Size", Size.ACAndAttackBonus());
+            armor += StatsProvidedByInventory(modifiers);
+            armor += StatsProvidedByCharacter(modifiers);
+            return armor;
         }
 
-        private int ArmorCalculator(List<ItemProperties> modifiers, out string descriptionOfArmorBonuses)
-        {
-            string miscDescription = "";
-            var miscArmorEffects = SumMiscModifiers(modifiers, out miscDescription);
-            string armorDescription = "";
-            var itemArmor = SumInventoryModifiers(modifiers, out armorDescription);
-            descriptionOfArmorBonuses = $"10 + {DexModifierForAC} from Dex + {Size.ACAndAttackBonus()} from Size {armorDescription} {miscArmorEffects}";
-
-            return new int[]
-            {
-                10,                                 //always get natural 10
-                DexModifierForAC,                   //add Dex
-                Size.ACAndAttackBonus(),            //Add ac from Size
-                miscArmorEffects,                   //Add misc armor effects
-                itemArmor                           //Add Modifiers from Items
-            }.Sum();
-        }
-
-        private string _armorClassDescription = "";
-        public string ArmorClassDescription { get { return _armorClassDescription; } }
-        public int ArmorClass
+        public StatDetails ArmorClass
         {
             get
             {
@@ -108,13 +205,11 @@ namespace Pathfinda.ViewModels
                     ItemProperties.NaturalArmor,
                     ItemProperties.Dodge,
                     ItemProperties.Deflection
-                }, out _armorClassDescription);
+                });
             }
         }
 
-        private string _touchACDescription = "";
-        public string TouchACDescription { get { return _touchACDescription; } }
-        public int TouchAC
+        public StatDetails TouchAC
         {
             get
             {
@@ -122,128 +217,200 @@ namespace Pathfinda.ViewModels
                 {
                     ItemProperties.Dodge,
                     ItemProperties.Deflection
-                }, out _touchACDescription);
-
+                });
             }
         }
 
-        private string _flatFootedACDescription = "";
-        public string FlatFootedACDescription { get { return _flatFootedACDescription; } }
-        public int FlatFootedAC
+        public StatDetails FlatFootedAC
         {
             get
             {
-
                 return ArmorCalculator(new List<ItemProperties>
                 {
                     ItemProperties.ArmorBonus,
                     ItemProperties.NaturalArmor,
                     ItemProperties.Deflection
-                }, out _flatFootedACDescription);
+                });
             }
         }
 
-        private string _spellResistanceDescription = "";
-        public string SpellResistanceDescription { get { return _spellResistanceDescription; } }
-        public int SpellResistance
+        public StatDetails SpellResistance
         {
             get
             {
-                return SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.SpellResistance }, out _spellResistanceDescription);
+                return StatsProvidedByInventory(ItemProperties.SpellResistance) + StatsProvidedByCharacter(ItemProperties.SpellResistance);
             }
         }
 
-        public string FortitudeDescription { get; private set; }
-        public int FortitudeSave
+        public StatDetails FortitudeSave
         {
             get
             {
-                int fort = AbilityScores[Abilities.Constitution.ToString()].Modifier(); // base save + con modifier + magic modifier + misc
-                string itemEffectsDescription = "";
-                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.FortitudeBonus }, out itemEffectsDescription);
-                FortitudeDescription = $"{fort} from Con {itemEffectsDescription}";
-                return fort + itemEffects;
+                StatDetails fortSave = new StatDetails();
+                fortSave.AddContributingFactor("Con", AbilityScores[Abilities.Constitution.ToString()].Modifier());
+                fortSave += StatsProvidedByInventory(ItemProperties.FortitudeBonus);
+                fortSave += StatsProvidedByCharacter(ItemProperties.FortitudeBonus);
+                return fortSave;
             }
         }
 
-        public string ReflexDescription { get; private set; }
-        public int ReflexSave
+        public StatDetails ReflexSave
         {
             get
             {
-                int reflex = AbilityScores[Abilities.Dexterity.ToString()].Modifier(); // base save + con modifier + magic modifier + misc
-                string itemEffectsDescription = "";
-                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.ReflexBonus }, out itemEffectsDescription);
-                ReflexDescription = $"{reflex} from Dex {itemEffectsDescription}";
-                return reflex + itemEffects;
+                StatDetails reflexSave = new StatDetails();
+                reflexSave.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                reflexSave += StatsProvidedByInventory(ItemProperties.ReflexBonus);
+                reflexSave += StatsProvidedByCharacter(ItemProperties.ReflexBonus);
+                return reflexSave;
             }
         }
 
-        public string WillDescription { get; private set; }
-        public int WillSave
+        public StatDetails WillSave
         {
             get
             {
-                int will = AbilityScores[Abilities.Wisdom.ToString()].Modifier(); // base save + con modifier + magic modifier + misc
-                string itemEffectsDescription = "";
-                int itemEffects = SumInventoryAndMiscModifiers(new List<ItemProperties>() { ItemProperties.WillBonus }, out itemEffectsDescription);
-                WillDescription = $"{will} from Wis {itemEffects}";
-                return will + itemEffects;
+                StatDetails willSave = new StatDetails();
+                willSave.AddContributingFactor("Wis", AbilityScores[Abilities.Wisdom.ToString()].Modifier());
+                willSave += StatsProvidedByInventory(ItemProperties.WillBonus);
+                willSave += StatsProvidedByCharacter(ItemProperties.WillBonus);
+                return willSave;
             }
         }
 
-        public string CMDDescription { get; private set; }
-        public List<int> CombatManeuverDefense
+        public StatDetails CombatManeuverDefense
         {
             get
             {
-                List<int> cmds = new List<int>();
-                int cmd = 10;
-                CMDDescription = "10";
-                cmd += AbilityScores[Abilities.Strength.ToString()].Modifier();
-                CMDDescription += $" + {AbilityScores[Abilities.Strength.ToString()].Modifier()} from Str";
-                cmd += AbilityScores[Abilities.Dexterity.ToString()].Modifier();
-                CMDDescription += $" + {AbilityScores[Abilities.Dexterity.ToString()].Modifier()} from Dex";
-                cmd += Size.ACAndAttackBonus();
-                CMDDescription += $" + {Size.ACAndAttackBonus()} from {Size} Size";
-                foreach (var thing in CharacterModifiers.Where(x => x.PropertyModified == ItemProperties.CombatManeuverDefense))
+                StatDetails cmd = new StatDetails();
+                cmd.AddContributingFactor("base", 10);
+                cmd.AddContributingFactor("Str", AbilityScores[Abilities.Strength.ToString()].Modifier());
+                cmd.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                cmd.AddContributingFactor("Size", Size.ACAndAttackBonus());
+                cmd += StatsProvidedByInventory(ItemProperties.CombatManeuverDefense);
+                cmd += StatsProvidedByCharacter(ItemProperties.CombatManeuverDefense);
+                return cmd;
+            }
+        }
+
+        /// <summary>
+        /// BAB is a single number, but it is often represented as +4 or +7/+2 or +14/+9/+4 because you get 3 attacks and use a different BAB per attack. 
+        /// BABFormatted will get you the nicely formatted string
+        /// </summary>
+        public StatDetails BaseAttackBonus
+        {
+            get
+            {
+                StatDetails bab = new StatDetails();
+                foreach (Class c in Classes)
                 {
-                    cmd += thing.Value;
-                    CMDDescription += $" + {thing.Value} from {thing.ModificationReason}";
+                    bab.AddContributingFactor($"{c.Name} level {c.Level}", Math.Floor(c.Level * c.BABGrowth));
                 }
-                CMDDescription += $" + {string.Join("/", BaseAttackBonus)} from BAB";
+                bab += StatsProvidedByInventory(ItemProperties.BaseAttackBonus);
+                bab += StatsProvidedByCharacter(ItemProperties.BaseAttackBonus);
+                return bab;
+            }
+        }
 
-                foreach (var bab in BaseAttackBonus)
+        public string BABFormatted
+        {
+            get
+            {
+                int b = (int)BaseAttackBonus.Total;
+                string bab = "+" + b.ToString();
+                while (b > 5)
                 {
-                    cmds.Add(cmd + bab);
+                    b -= 5;
+                    bab += "/+" + b.ToString();
                 }
-                return cmds;
+                return bab;
             }
         }
 
-        public List<int> BaseAttackBonus
+        public StatDetails Initiative
         {
             get
             {
-                // TODO
-                return new List<int>() { 0 };
+                StatDetails init = new StatDetails();
+                init.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                init += StatsProvidedByInventory(ItemProperties.Initiative);
+                init += StatsProvidedByCharacter(ItemProperties.Initiative);
+                return init;
             }
         }
 
-        public int Initiative
+        public StatDetails Speed
         {
             get
             {
-                return 2; // dex modifier + misc
+                StatDetails speed = new StatDetails();
+                speed.AddContributingFactor($"{Race.ToString()} race", Race.Speed());
+                speed += StatsProvidedByInventory(ItemProperties.Speed);
+                speed += StatsProvidedByCharacter(ItemProperties.Speed);
+
+                if (Race != Races.Dwarf && ( Encumbrance == Loads.Medium || Encumbrance == Loads.Heavy))
+                {
+                    // http://paizo.com/pathfinderRPG/prd/coreRulebook/additionalRules.html#armor-and-encumbrance-for-other-base-speeds
+                    var encumberedSpeed = Math.Ceiling(Math.Ceiling(speed.Total * 2 / 3) / 5) * 5;
+                    speed.AddContributingFactor(Encumbrance.ToString() + " load", (-1 * speed.Total) + encumberedSpeed); // this is a negative number to take the total down to encumbered speed
+                }
+                else if (Encumbrance == Loads.Overloaded)
+                {
+                    speed = new StatDetails();
+                    speed.AddContributingFactor("Overloaded!", 5);
+                }
+                return speed;
             }
         }
 
-        public int Speed
+        #region Skills
+        public StatDetails Acrobatics               { get { return GetSkillBonusFor(ItemProperties.Acrobatics); } }
+        public StatDetails Appraise                 { get { return GetSkillBonusFor(ItemProperties.Appraise); } }
+        public StatDetails Bluff                    { get { return GetSkillBonusFor(ItemProperties.Bluff); } }
+        public StatDetails Climb                    { get { return GetSkillBonusFor(ItemProperties.Climb); } }
+        public StatDetails Craft                    { get { return GetSkillBonusFor(ItemProperties.Craft); } }
+        public StatDetails Diplomacy                { get { return GetSkillBonusFor(ItemProperties.Diplomacy); } }
+        public StatDetails DisableDevice            { get { return GetSkillBonusFor(ItemProperties.DisableDevice); } }
+        public StatDetails Disguise                 { get { return GetSkillBonusFor(ItemProperties.Disguise); } }
+        public StatDetails EscapeArtist             { get { return GetSkillBonusFor(ItemProperties.EscapeArtist); } }
+        public StatDetails Fly                      { get { return GetSkillBonusFor(ItemProperties.Fly); } }
+        public StatDetails HandleAnimal             { get { return GetSkillBonusFor(ItemProperties.HandleAnimal); } }
+        public StatDetails Heal                     { get { return GetSkillBonusFor(ItemProperties.Heal); } }
+        public StatDetails Intimidate               { get { return GetSkillBonusFor(ItemProperties.Intimidate); } }
+        public StatDetails KnowledgeArcana          { get { return GetSkillBonusFor(ItemProperties.KnowledgeArcana); } }
+        public StatDetails KnowledgeDungeoneering   { get { return GetSkillBonusFor(ItemProperties.KnowledgeDungeoneering); } }
+        public StatDetails KnowledgeEngineering     { get { return GetSkillBonusFor(ItemProperties.KnowledgeEngineering); } }
+        public StatDetails KnowledgeGeography       { get { return GetSkillBonusFor(ItemProperties.KnowledgeGeography); } }
+        public StatDetails KnowledgeHistory         { get { return GetSkillBonusFor(ItemProperties.KnowledgeHistory); } }
+        public StatDetails KnowledgeLocal           { get { return GetSkillBonusFor(ItemProperties.KnowledgeLocal); } }
+        public StatDetails KnowledgeNature          { get { return GetSkillBonusFor(ItemProperties.KnowledgeNature); } }
+        public StatDetails KnowledgeNobility        { get { return GetSkillBonusFor(ItemProperties.KnowledgeNobility); } }
+        public StatDetails KnowledgePlanes          { get { return GetSkillBonusFor(ItemProperties.KnowledgePlanes); } }
+        public StatDetails KnowledgeReligion        { get { return GetSkillBonusFor(ItemProperties.KnowledgeReligion); } }
+        public StatDetails Linguistics              { get { return GetSkillBonusFor(ItemProperties.Linguistics); } }
+        public StatDetails Perception               { get { return GetSkillBonusFor(ItemProperties.Perception); } }
+        public StatDetails Perform                  { get { return GetSkillBonusFor(ItemProperties.Perform); } }
+        public StatDetails Profession               { get { return GetSkillBonusFor(ItemProperties.Profession); } }
+        public StatDetails Ride                     { get { return GetSkillBonusFor(ItemProperties.Ride); } }
+        public StatDetails SenseMotive              { get { return GetSkillBonusFor(ItemProperties.SenseMotive); } }
+        public StatDetails SleightOfHand            { get { return GetSkillBonusFor(ItemProperties.SleightOfHand); } }
+        public StatDetails Spellcraft               { get { return GetSkillBonusFor(ItemProperties.Spellcraft); } }
+        public StatDetails Stealth                  { get { return GetSkillBonusFor(ItemProperties.Stealth); } }
+        public StatDetails Survival                 { get { return GetSkillBonusFor(ItemProperties.Survival); } }
+        public StatDetails Swim                     { get { return GetSkillBonusFor(ItemProperties.Swim); } }
+        public StatDetails UseMagicDevice           { get { return GetSkillBonusFor(ItemProperties.UseMagicDevice); } }
+
+        public StatDetails GetSkillBonusFor(ItemProperties skill)
         {
-            get
-            {
-                return 30;
-            }
+            StatDetails details = new StatDetails();
+            if (Classes.SelectMany(x => x.ClassSkills).Any(x => x == skill))
+                details.AddContributingFactor("Class", 3);
+            if (Race.SkillBonuses().Any(x => x == skill))
+                details.AddContributingFactor("Race", 2);
+            details += StatsProvidedByInventory(skill);
+            details += StatsProvidedByCharacter(skill);
+            return details;
         }
+        #endregion
     }
 }

@@ -25,8 +25,6 @@ namespace MongoModels
 
     public abstract class MongoEntityBase<T> : MongoEntityBase where T : MongoEntityBase
     {
-
-
         public static IMongoCollection<T> collection = Database.Instance.db.GetCollection<T>(typeof(T).Name);
         // T will be Character, or Feat, or whatever
         public static T GetById(ObjectId id)
@@ -40,7 +38,7 @@ namespace MongoModels
                 .FindOneAndReplaceAsync<T>(
                     filter: doc => doc._id == puts._id,
                     replacement: (puts),
-                    options: new FindOneAndReplaceOptions<T> { IsUpsert= true }
+                    options: new FindOneAndReplaceOptions<T> { IsUpsert = true }
                 );
         }
 
@@ -58,13 +56,12 @@ namespace MongoModels
         public static T Create()
         {
             var createdT = Activator.CreateInstance(typeof(T), true) as T;
-            collection.InsertOne(createdT);
+            collection.InsertOne(createdT); // what does this do if no user?
             return createdT;
         }
-        
+
         protected MongoEntityBase()
         {
-
         }
     }
 }

@@ -16,6 +16,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Pathfinda.ViewModels;
+
 namespace Pathfinda
 {
     /// <summary>
@@ -23,17 +25,25 @@ namespace Pathfinda
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ObservableCollection<string> Alignments
+        public List<Alignments> Alignments
         {
             get
             {
-                var returnValue = new ObservableCollection<string>(Enum.GetValues(typeof(Alignments)).OfType<Alignments>().Select(x => x.ToSentence()));
-                return returnValue;
+                return Enum.GetValues(typeof(Alignments)).OfType<Alignments>().ToList();
             }
         }
+
+        public List<Races> Races
+        {
+            get
+            {
+                return Enum.GetValues(typeof(Races)).OfType<Races>().ToList();
+            }
+        }
+
         //List of available Characters
-        private ObservableCollection<Character> _characters = null;
-        public ObservableCollection<Character> Characters
+        private ObservableCollection<CharacterVM> _characters = null;
+        public ObservableCollection<CharacterVM> Characters
         {
             get
             {
@@ -46,8 +56,8 @@ namespace Pathfinda
             }
         }
         //Character selected to be altered
-        private Character _character;
-        public Character Character
+        private CharacterVM _character;
+        public CharacterVM Character
         {
             get
             {
@@ -80,6 +90,7 @@ namespace Pathfinda
             InitializeComponent();
             this.DataContext = this;
             Loaded += MainWindow_Loaded;
+            Characters = new ObservableCollection<CharacterVM>();
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -93,9 +104,9 @@ namespace Pathfinda
         private void LoginWindow_NewUserAttempt(string username, string password)
         {
             User = MongoModels.Models.User.newUser(username, password);
-            Character = CharacterClass.Create();
+            Character = CharacterClass.Create() as CharacterVM;
             Character.Owner = User._id;
-            Characters = new ObservableCollection<Character>() { Character };
+            Characters = new ObservableCollection<CharacterVM>() { Character };
         }
 
         private void LoginWindow_LoginAttempt(string username, string password)
@@ -103,12 +114,12 @@ namespace Pathfinda
             User = MongoModels.Models.User.getUser(username, password);
             if (User != null)
             {
-                Characters = new ObservableCollection<Character>(CharacterClass.getUserCharacters(User));
+                Characters = new ObservableCollection<CharacterVM>(CharacterClass.getUserCharacters(User).Select(x => x as CharacterVM));
                 if (Characters == null)
                 {
-                    Character = CharacterClass.Create();
+                    Character = CharacterClass.Create() as CharacterVM;
                     Character.Owner = User._id;
-                    Characters = new ObservableCollection<Character> { Character };
+                    Characters = new ObservableCollection<CharacterVM> { Character };
                 }
                 else
                 {
@@ -139,7 +150,10 @@ namespace Pathfinda
 
         private void AddCharacterButton(object sender, RoutedEventArgs e)
         {
-            Character = CharacterClass.Create();
+            var c = CharacterVMClass.Create();
+            Character = c as CharacterVM;
+            Character.Classes.Add(ImportedData.Classes.First(x => x.Name == "Sorcerer")); // test data
+            Character.Classes.First().Level = 1;
             Character.Owner = User._id;
             Characters.Add(Character);
         }
