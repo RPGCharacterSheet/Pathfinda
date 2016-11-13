@@ -5,20 +5,23 @@ using System.Web;
 using System.Web.Mvc;
 using MongoModels.Models;
 using MongoDB.Bson;
+using MongoDB.Bson.IO;
 namespace WebAPI.Controllers
 {
     public class CharacterController : Controller
     {
-
+        static JsonWriterSettings strictWriter = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
         // GET: Character/5d37a94d...
         public string Index(string id=null, string user=null)
         {
             Response.ContentType = "application/json";
             return (id != null)
-                ? CharacterClass.GetById(new ObjectId(id)).ToJson()
+                ? CharacterClass.GetById(new ObjectId(id)).ToJson(writerSettings: strictWriter)
                 : (user != null)
-                    ? CharacterClass.getUserCharacters(MongoModels.Models.User.GetById(new ObjectId(user))).ToJson()
-                    : @"{""Error"": ""Either id or user needs to be set in query""}";
+                    ? CharacterClass
+                        .getUserCharacters(MongoModels.Models.User.GetById(new ObjectId(user)))
+                        .ToJson(writerSettings: strictWriter)
+                    : new { Error = "Either id or user needs to be set in query"}.ToJson(writerSettings: strictWriter);
         }
 
         // POST: Character/Create
@@ -46,7 +49,7 @@ namespace WebAPI.Controllers
                 character.Owner = new ObjectId(user);
             }
             CharacterClass.PutSync(character, MongoModels.Models.User.GetById(new ObjectId(user)));
-            return character.ToJson();
+            return character.ToJson(writerSettings: strictWriter);
         }
 
         // GET||Post: Character/Edit

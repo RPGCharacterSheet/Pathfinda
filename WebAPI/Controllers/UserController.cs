@@ -10,6 +10,8 @@ namespace WebAPI.Controllers
 {
     public class UserController : Controller
     {
+        public static JsonWriterSettings strictWriter = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
+
         // GET: User
         [HttpPost]
         public string Index(string userName, string password)
@@ -44,7 +46,7 @@ namespace WebAPI.Controllers
             return MongoModels.Models.User
                 .findUserWithLikeName(name)
                 .Select(e => new { UserName = e.UserName, _id = e._id })
-                .ToJson(writerSettings: new JsonWriterSettings { OutputMode = JsonOutputMode.Strict });
+                .ToJson(writerSettings: strictWriter);
         }
 
         // GET: User/Delete/5
