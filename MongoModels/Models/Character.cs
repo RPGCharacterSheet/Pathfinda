@@ -14,7 +14,7 @@ namespace MongoModels.Models
         public virtual string CreatorName { get; set; }
         public virtual Races Race { get; set; }
         public virtual List<Class> Classes { get; set; }
-        public virtual Dictionary<string, AbilityScore> AbilityScores { get; set; }
+        public virtual Dictionary<string, int> AbilityScores { get; set; }
         public virtual List<InventoryItem> Inventory { get; set; }
         public virtual List<CharacterModifier> CharacterModifiers { get; set; }
         public virtual List<Spell> SpellsKnown { get; set; }
@@ -40,18 +40,17 @@ namespace MongoModels.Models
         public Character() : base()
         {
             Classes = new List<Class>();
-            AbilityScores = new Dictionary<string, AbilityScore>();
             Inventory = new List<InventoryItem>();
             CharacterModifiers = new List<CharacterModifier>();
             SpellsKnown = new List<Spell>();
-            AbilityScores = new Dictionary<string, AbilityScore>()
+            AbilityScores = new Dictionary<string, int>()
             {
-                {Abilities.Strength.ToString(), new AbilityScore(Abilities.Strength, 10) },
-                {Abilities.Constitution.ToString(), new AbilityScore(Abilities.Constitution, 10) },
-                {Abilities.Dexterity.ToString(),  new AbilityScore(Abilities.Dexterity, 10) },
-                {Abilities.Wisdom.ToString(),  new AbilityScore(Abilities.Wisdom, 10) },
-                {Abilities.Intelligence.ToString(), new AbilityScore(Abilities.Intelligence, 10) },
-                {Abilities.Charisma.ToString(), new AbilityScore(Abilities.Charisma, 10) },
+                {"Strength",10},
+                {"Constitution", 10},
+                {"Dexterity", 10},
+                {"Wisdom", 10},
+                {"Intelligence", 10},
+                {"Charisma", 10},
             };
         }
     }

@@ -130,7 +130,7 @@ namespace Pathfinda.ViewModels
 
         public Loads EncumbranceByWeight
         {
-            get { return Formulas.GetEncumbrance(GearWeight, AbilityScores[Abilities.Strength.ToString()].Score, Size); }
+            get { return Formulas.GetEncumbrance(GearWeight, AbilityScores[Abilities.Strength.ToString()], Size); }
         }
 
         public Loads EncumbranceByArmor
@@ -145,7 +145,7 @@ namespace Pathfinda.ViewModels
 
         public int DexModifierForAC
         {
-            get { return Math.Min(AbilityScores[Abilities.Dexterity.ToString()].Modifier(), Encumbrance.MaxDexBonus()); }
+            get { return Math.Min(Formulas.GetAbilityModifier(AbilityScores[Abilities.Dexterity.ToString()]), Encumbrance.MaxDexBonus()); }
         }
 
         private int TryGetItemProperty(InventoryItem item, ItemProperties property, int @default = 0)
@@ -247,7 +247,7 @@ namespace Pathfinda.ViewModels
             get
             {
                 StatDetails fortSave = new StatDetails();
-                fortSave.AddContributingFactor("Con", AbilityScores[Abilities.Constitution.ToString()].Modifier());
+                fortSave.AddContributingFactor("Con", Formulas.GetAbilityModifier(AbilityScores[Abilities.Constitution.ToString()]));
                 fortSave += StatsProvidedByInventory(ItemProperties.FortitudeBonus);
                 fortSave += StatsProvidedByCharacter(ItemProperties.FortitudeBonus);
                 return fortSave;
@@ -259,7 +259,7 @@ namespace Pathfinda.ViewModels
             get
             {
                 StatDetails reflexSave = new StatDetails();
-                reflexSave.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                reflexSave.AddContributingFactor("Dex", Formulas.GetAbilityModifier(AbilityScores[Abilities.Dexterity.ToString()]));
                 reflexSave += StatsProvidedByInventory(ItemProperties.ReflexBonus);
                 reflexSave += StatsProvidedByCharacter(ItemProperties.ReflexBonus);
                 return reflexSave;
@@ -271,7 +271,7 @@ namespace Pathfinda.ViewModels
             get
             {
                 StatDetails willSave = new StatDetails();
-                willSave.AddContributingFactor("Wis", AbilityScores[Abilities.Wisdom.ToString()].Modifier());
+                willSave.AddContributingFactor("Wis", Formulas.GetAbilityModifier(AbilityScores[Abilities.Wisdom.ToString()]));
                 willSave += StatsProvidedByInventory(ItemProperties.WillBonus);
                 willSave += StatsProvidedByCharacter(ItemProperties.WillBonus);
                 return willSave;
@@ -284,8 +284,8 @@ namespace Pathfinda.ViewModels
             {
                 StatDetails cmd = new StatDetails();
                 cmd.AddContributingFactor("base", 10);
-                cmd.AddContributingFactor("Str", AbilityScores[Abilities.Strength.ToString()].Modifier());
-                cmd.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                cmd.AddContributingFactor("Str", Formulas.GetAbilityModifier(AbilityScores[Abilities.Strength.ToString()]));
+                cmd.AddContributingFactor("Dex", Formulas.GetAbilityModifier(AbilityScores[Abilities.Dexterity.ToString()]));
                 cmd.AddContributingFactor("Size", Size.ACAndAttackBonus());
                 cmd += StatsProvidedByInventory(ItemProperties.CombatManeuverDefense);
                 cmd += StatsProvidedByCharacter(ItemProperties.CombatManeuverDefense);
@@ -332,7 +332,7 @@ namespace Pathfinda.ViewModels
             get
             {
                 StatDetails init = new StatDetails();
-                init.AddContributingFactor("Dex", AbilityScores[Abilities.Dexterity.ToString()].Modifier());
+                init.AddContributingFactor("Dex", Formulas.GetAbilityModifier(AbilityScores[Abilities.Dexterity.ToString()]));
                 init += StatsProvidedByInventory(ItemProperties.Initiative);
                 init += StatsProvidedByCharacter(ItemProperties.Initiative);
                 return init;

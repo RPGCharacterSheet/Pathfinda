@@ -23,5 +23,14 @@ namespace Pathfinda
             else
                 return Loads.Overloaded;
         }
+
+        public static int GetAbilityModifier(int ability)
+        {
+            // 1:       -5
+            // 2-3:     -4
+            // 10-11:   0
+            // 18-19:   +4
+            return (int)((double)ability / 2d) - 5;
+        }
     }
 }
