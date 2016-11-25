@@ -54,10 +54,10 @@ namespace WebAPI.Controllers
 
         // GET||Post: Character/Edit
         [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post)]
-        public string Edit(Character character, User.UserModel user)
+        public string Edit(Character character, string user)
         {
             Response.ContentType = "application/json";
-            CharacterClass.PutSync(character, user);
+            CharacterClass.PutSync(character, MongoModels.Models.User.GetById(new ObjectId(user)));
             return character.ToJson();
         }
 

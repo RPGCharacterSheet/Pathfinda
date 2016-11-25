@@ -23,6 +23,7 @@ namespace MongoModels
         private Database()
         {
             var connectionString = "mongodb://jogimbel.ddns.net";
+            connectionString = "mongodb://192.168.1.185";
             client = new MongoClient(connectionString);
             db = client.GetDatabase("Pathfinda");
 
