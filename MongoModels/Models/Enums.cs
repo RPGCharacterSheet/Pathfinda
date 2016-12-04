@@ -53,7 +53,7 @@ namespace MongoModels.Models
         BaseAttackBonus,
         Initiative,
         // class skills
-        Acrobatics = 100,
+        Acrobatics,
         Appraise,
         Bluff,
         Climb,

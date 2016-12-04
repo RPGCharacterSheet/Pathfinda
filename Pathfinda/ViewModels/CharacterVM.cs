@@ -135,7 +135,9 @@ namespace Pathfinda.ViewModels
 
         public Loads EncumbranceByArmor
         {
-            get { return (Loads)(Inventory.Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight.ToString()))?.Max(x => (int?)x.Properties[ItemProperties.ArmorWeight.ToString()]) ?? 0); }
+            get { return (Loads)(Inventory
+                    .Where(x => x.Properties.Any(y => y.Key == ItemProperties.ArmorWeight.ToString()))?
+                    .Max(x => (int?)x.Properties[ItemProperties.ArmorWeight.ToString()]) ?? 0); }
         }
 
         public Loads Encumbrance

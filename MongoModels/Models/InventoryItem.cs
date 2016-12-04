@@ -22,7 +22,7 @@ namespace MongoModels.Models
         /// <summary>
         /// In Gold pieces
         /// </summary>        
-        public double Value { get; set; }
+        public double GoldValue { get; set; }
         /// <summary>
         /// For weapons only
         /// e.g. 1d4 
@@ -44,12 +44,11 @@ namespace MongoModels.Models
         /// Key is ItemProperties enum
         /// </summary>
         public Dictionary<string, int> Properties { get; set; }
-        public List<ItemDescriptors> Descriptors { get; set; }
+        public string Notes { get; set; }
 
         public InventoryItem()
         {
             Properties = new Dictionary<string, int>();
-            Descriptors = new List<ItemDescriptors>();
         }
     }
 }
